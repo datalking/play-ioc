@@ -25,7 +25,7 @@ start from [http://localhost:8999](http://localhost:8999)
 
 ## todo
 
-- [ ] 支持多实例 
+- [ ] 基本aop功能 
 
 - [x] 基本IoC
 
