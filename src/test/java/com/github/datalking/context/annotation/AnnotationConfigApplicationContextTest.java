@@ -35,16 +35,17 @@ public class AnnotationConfigApplicationContextTest {
 
     @Test
     public void testAnnoConfigurationBeans() throws Exception {
-//        ApplicationContext ctx = new AnnotationConfigApplicationContext(AnnotationConfigApplicationContextTest.class);
-//        HelloWorld helloWorld = (HelloWorld) ctx.getBean("helloWorld");
-//        helloWorld.setMessage("Hello World!");
-//        helloWorld.getMessage();
+        ApplicationContext ctx = new AnnotationConfigApplicationContext(AnnotationConfigApplicationContextTest.class);
+        HelloWorld helloWorld = (HelloWorld) ctx.getBean("helloWorld");
+        helloWorld.setMessage("Hello World!");
+        helloWorld.getMessage();
     }
 
     @Test
     public void testAnnoScanBeans() throws Exception {
         String basePackage = "com.github.datalking.bean";
-        ApplicationContext ctx = new AnnotationConfigApplicationContext(basePackage);
+//        ApplicationContext ctx = new AnnotationConfigApplicationContext(basePackage);
+        ApplicationContext ctx = new AnnotationConfigApplicationContext("com.github.datalking.bean");
         HelloWorld helloWorld = (HelloWorld) ctx.getBean("helloWorld");
         helloWorld.setMessage("Hello World2!");
         helloWorld.getMessage();

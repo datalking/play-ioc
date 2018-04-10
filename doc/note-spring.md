@@ -3,6 +3,11 @@ Spring笔记
 
 ## summary
 
+- spring aop概念
+    - aspect：切面
+    - advice：增强处理的通知
+    - pointcut：切入点，通过切入点表达式定义，添加了增强处理通知的方法调用处
+    - joinpoint：连接点，所有方法调用处
 - 扫描basePackage  
     - ComponentScanBeanDefinitionParser解析xml中配置的 `<context:component-scan base-package="a.b" />`
     - ClassPathBeanDefinitionScanner解析直接传入的包名

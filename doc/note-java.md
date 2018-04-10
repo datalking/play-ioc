@@ -3,6 +3,8 @@ java笔记
 
 ## summary
 
+- AspectJ可以作为静态aop，在编译阶段完成对程序的修改
+
 - java 反射
     - getDeclaredField()：是可以获取一个类的所有字段  
     - getField()：只能获取类的 `public` 字段 
