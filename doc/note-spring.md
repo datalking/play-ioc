@@ -3,26 +3,85 @@ Spring笔记
 
 ## summary
 
+
+- BeanDefinition
+    - 对于GenericBD和ChildBD，parentName可以有
+    - 对于RootBD，parentName不存在，getParentName()始终返回空
+- spring扩展点
+    - 用BeanPostProcessor定制bean实例化后的初始化逻辑，发生在 `doCreateBean()` -> `initializeBean()` 
+        - 实现该接口可提供自定义（或默认地来覆盖容器）的实例化逻辑、依赖解析逻辑等
+        - 如果配置了多个BeanPostProcessor，那么可以通过设置 `order` 属性来控制执行次序
+        - BeanPostProcessor仅对所在容器中的bean进行后置处理，将不会对定义在另一个容器中的bean进行后置处理
+        - AOP自动代理实现了BeanPostProcessor，所以BeanPostProcessors或bean的直接引用不会被自动代理
+    - 用BeanFactoryPostProcessor定制BeanDefinition元数据，发生在`refresh()` -> `invokeBeanFactoryPostProcessors()`
+        - BeanFactoryPostProcessor在容器实际实例化任何其它的bean之前读取配置元数据，并有可能修改它
+    - FactoryBean接口是插入到Spring IoC容器用来定制实例化逻辑的一个接口点
+    
+- spring createBean()顺序
+    - doCreateBean()之前，`resolveBeforeInstantiation()` 可提前返回 beanPostProcessor处理过得bean
+    - beanFactoryAware和beanNameAware的处理是在 `doCreateBean() -> initializeBean()`
+    - `initializeBean()` 方法中先执行 xxAware，再执行 afterPropertiesSet()
+    
+- - spring注解扫描解析
+      - @ComponentScan: ConfigurationClassParser.doProcessConfigurationClass()
+      - @Component: ClassPathScanningCandidateComponentProvider.findCandidateComponents()
+      - @Configuration: ConfigurationClassPostProcessor.processConfigBeanDefinitions()
+      - @Bean: ConfigurationClassParser.doProcessConfigurationClass()
+      
+- AbstractApplicationContext类 refresh() 
+    1) prepareRefresh();
+        - 初始化前的准备工作，如对系统属性或者环境进行准备及验证
+    2) ConfigurableListableBeanFactory beanFactory = obtainFreshBeanFactory();
+        - 初始化BeanFactory，并进行XML文件读取
+    3) prepareBeanFactory(beanFactory);
+        - 对BeanFactory进行各种功能填充
+    4) postProcessBeanFactory(beanFactory);
+        - 初始化前的准备工作，如对系统属性或者环境进行准备及验证
+    5) invokeBeanFactoryPostProcessors(beanFactory);
+        - 激活各种BeanFactory处理器
+        - 扫描 `@Configuration` 和 `@Bean` 
+    6) registerBeanPostProcessors(beanFactory);
+        - 拦截bean创建的bean处理器，这里只是注册，真正的调用是在getBean时候
+        - 将各种BeanDefnition转换成RootBeanDefinition，如Annotated, Scanned
+        - 扫描 `@Bean` ，将各种BeanDefnition转换成RootBeanDefinition，包括 `ConfigurationClassBeanDefinition`
+    7) initMessageSource();
+        - 为上下文初始化Message源，即对不同语言的消息体进行国际化处理
+    8) initApplicationEventMulticaster();
+        - 初始化应用消息广播器，并放入 `applicationEventMulticaster` bean中
+    9) onRefresh();
+        - 留给子类来初始化其他的bean
+    10) registerListeners();
+        - 在所有注册的bean中查找listenerbean，注册到消息广播器中
+    11) finishBeanFactoryInitialization(beanFactory);
+        - 初始化剩下的单例(非懒加载)
+    12) finishRefresh();
+        - 完成刷新过程，通知生命周期处理器lifecycleProcessor刷新过程，同时发出ContextRefreshEvent通知别人
+    
 - spring aop概念
     - aspect：切面
     - advice：增强处理的通知
     - pointcut：切入点，通过切入点表达式定义，添加了增强处理通知的方法调用处
     - joinpoint：连接点，所有方法调用处
+    
 - 扫描basePackage  
     - ComponentScanBeanDefinitionParser解析xml中配置的 `<context:component-scan base-package="a.b" />`
     - ClassPathBeanDefinitionScanner解析直接传入的包名
+    
 - dependenciesForBeanMap记录bean之间的依赖关系有两方面的作用：  
     - 在单例情况下，可以指定相互依赖bean之间的销毁顺序
     - 避免循环依赖
+    
 - spring doGetBean()方法执行顺序  
     - getSingleton()
     - new ObjectFactory(){}
     - createBean()
+    
 - spring bean配置不同类型方法的执行顺序，从先到后：
     - postProcessBeforeInitialization
     - afterPropertiesSet
     - init-method
     - postProcessAfterInitialization
+    
 - spring doCreateBean()方法中3个重要的任务
     - 创建实例：createBeanInstance(beanName, mbd, args); -> BeanWrapper
     - 注入属性：populateBean(beanName, mbd, instanceWrapper); -> void

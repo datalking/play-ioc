@@ -1,7 +1,5 @@
 package com.github.datalking.context.annotation;
 
-import com.github.datalking.beans.factory.support.AbstractBeanFactory;
-import com.github.datalking.beans.factory.support.BeanDefinitionRegistry;
 import com.github.datalking.beans.factory.support.DefaultListableBeanFactory;
 import com.github.datalking.context.support.AbstractApplicationContext;
 import com.github.datalking.util.Assert;

@@ -22,4 +22,5 @@ public class AnnotatedGenericBeanDefinition extends GenericBeanDefinition implem
     public AnnotationMetadata getMetadata() {
         return metadata;
     }
+
 }

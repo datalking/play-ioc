@@ -3,6 +3,7 @@ java笔记
 
 ## summary
 
+
 - AspectJ可以作为静态aop，在编译阶段完成对程序的修改
 
 - java 反射

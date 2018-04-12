@@ -28,12 +28,12 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
     @Override
     @SuppressWarnings("unchecked")
     public <T> T createBean(Class<T> beanClass) throws Exception {
-        BeanDefinition bd = new GenericBeanDefinition();
-        return (T) createBean(beanClass.getName(), (GenericBeanDefinition) bd, null);
+        BeanDefinition bd = new RootBeanDefinition();
+        return (T) createBean(beanClass.getName(), (RootBeanDefinition) bd, null);
     }
 
     @Override
-    protected Object createBean(String beanName, GenericBeanDefinition bd, Object[] args) throws Exception {
+    protected Object createBean(String beanName, RootBeanDefinition bd, Object[] args) throws Exception {
 
         Class beanClass = doResolveBeanClass(bd);
         bd.setBeanClass(beanClass);
@@ -42,7 +42,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
     }
 
 
-    protected Object doCreateBean(final String beanName, final GenericBeanDefinition bd, final Object[] args) throws Exception {
+    protected Object doCreateBean(final String beanName, final RootBeanDefinition bd, final Object[] args) throws Exception {
 
         BeanWrapper instanceWrapper = null;
 
@@ -75,7 +75,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
         return bean;
     }
 
-    protected BeanWrapper createBeanInstance(String beanName, GenericBeanDefinition bd, Object[] args) throws Exception {
+    protected BeanWrapper createBeanInstance(String beanName, RootBeanDefinition bd, Object[] args) throws Exception {
 
 //        Class beanClass = doResolveBeanClass(bd);
 //        bd.setBeanClass(beanClass);
@@ -91,7 +91,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
      * 通过jdk反射生成bean实例
      * spring对调用无参构造函数生成实例使用的是cglib
      */
-    private BeanWrapper instantiateBean(final String beanName, final GenericBeanDefinition bd) throws IllegalAccessException, InstantiationException {
+    private BeanWrapper instantiateBean(final String beanName, final RootBeanDefinition bd) throws IllegalAccessException, InstantiationException {
 
         Object beanInstance = bd.getBeanClass().newInstance();
         BeanWrapper bw = new BeanWrapperImpl(beanInstance);
@@ -100,13 +100,13 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 
     }
 
-    private void populateBean(String beanName, GenericBeanDefinition bd, BeanWrapper bw) throws Exception {
+    private void populateBean(String beanName, RootBeanDefinition bd, BeanWrapper bw) throws Exception {
 
         applyPropertyValues(beanName, bd, bw);
 
     }
 
-    private Class<?> doResolveBeanClass(GenericBeanDefinition bd) throws ClassNotFoundException {
+    private Class<?> doResolveBeanClass(RootBeanDefinition bd) throws ClassNotFoundException {
         String className = bd.getBeanClassName();
         if (className != null) {
             return Class.forName(className);
