@@ -4,11 +4,12 @@
 ## target
 - 稳定健壮的IoC和AOP功能（ing）
 - 与Spring相同的使用方式
+- lite版仅支持IoC，不支持AOP，不推荐使用[play-ioc-lite](https://github.com/datalking/play-ioc-lite)
 
 ## overview
 - 支持从xml中读取bean配置
 - 支持从注解中读取bean配置
-- ApplicationContext加载bean默认采用立即初始化，暂不支持懒加载开启，DefaultListableBeanFactory默认采用懒加载
+- ApplicationContext加载bean默认采用立即初始化，DefaultListableBeanFactory默认采用懒加载
 - 仅支持单例bean，不支持多实例
 - 目前暂不支持：
     - 不支持将bean的value类型配置为set,list,map，仅支持字符串和ref  
@@ -22,7 +23,6 @@
         - ~~`<property name="fieldName"> <value="valueHere"></value> </property>`~~   
         - ~~`<property name="person"> <bean class="a.b.Person.class"></bean> </property>`~~   
     - 不支持xml格式校验和属性名校验，请手动检查
-    - 不支持FactoryBean
     - 不支持属性编辑器，默认自动转换基本类型对象，需要在源码上定制处理Date、File等字段
     - ...
 
@@ -67,14 +67,11 @@ System.out.println(beanAllStr);
 - [ ] 基本aop功能 
 - [ ] aop织入顺序 @Order  
 - [ ] getBean By class   
-- [ ] xml 支持constructor-args元素   
 - [ ] 支持BeanPostProcessor   
 - [ ] 支持别名   
-- [ ] 注解支持 `@Named`, `@Injected`   
+- [ ] xml新增支持constructor-args元素   
 - [ ] 处理嵌套bean的问题   
-- [ ] 解决多重嵌套依赖问题   
 - [ ] xml中同名bean抛出异常   
-- [ ] 扫描指定包时利用asm实现所有子包.class文件的不加载，最初是预加载指定包获取bean信息   
 
 - [x] 手动通过注解注册bean生成BeanDefinition: @Configuration  @Bean   
 - [x] 各种BeanDefinition转换成RootBeanDefinition   
@@ -83,6 +80,9 @@ System.out.println(beanAllStr);
 ## later
 - [ ] 使用@Configuration、@Bean时支持调用带参数的构造函数   
 - [ ] 使用@Configuration、@Bean时支持static方法   
+- [ ] 扫描指定包时利用asm实现所有子包.class文件的不加载，最初是预加载指定包获取bean信息   
+- [ ] 注解支持 `@Named`, `@Injected`   
+- [ ] 解决多重嵌套依赖问题   
 
 ## user guide
 - play-ioc支持的xml配置说明
