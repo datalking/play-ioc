@@ -2,7 +2,9 @@ package com.github.datalking.beans.factory.support;
 
 import com.github.datalking.annotation.Bean;
 import com.github.datalking.annotation.meta.AnnotationMetadata;
+import com.github.datalking.annotation.meta.MethodMetadata;
 import com.github.datalking.beans.factory.config.AnnotatedBeanDefinition;
+import com.github.datalking.context.annotation.ConfigurationClass;
 
 import java.lang.reflect.Method;
 
@@ -16,9 +18,25 @@ public class ConfigurationClassBeanDefinition extends RootBeanDefinition impleme
 
     private final AnnotationMetadata annotationMetadata;
 
-    public ConfigurationClassBeanDefinition(AnnotationMetadata annotationMetadata) {
+    private final MethodMetadata factoryMethodMetadata;
+
+
+    public ConfigurationClassBeanDefinition(ConfigurationClass configClass, MethodMetadata beanMethodMetadata) {
         super();
-        this.annotationMetadata = annotationMetadata;
+        this.annotationMetadata = configClass.getMetadata();
+        this.factoryMethodMetadata = beanMethodMetadata;
+    }
+
+    public ConfigurationClassBeanDefinition(RootBeanDefinition original, ConfigurationClass configClass, MethodMetadata beanMethodMetadata) {
+        super(original);
+        this.annotationMetadata = configClass.getMetadata();
+        this.factoryMethodMetadata = beanMethodMetadata;
+    }
+
+    private ConfigurationClassBeanDefinition(ConfigurationClassBeanDefinition original) {
+        super(original);
+        this.annotationMetadata = original.annotationMetadata;
+        this.factoryMethodMetadata = original.factoryMethodMetadata;
     }
 
     @Override
@@ -31,6 +49,16 @@ public class ConfigurationClassBeanDefinition extends RootBeanDefinition impleme
     @Override
     public AnnotationMetadata getMetadata() {
         return null;
+    }
+
+    public MethodMetadata getFactoryMethodMetadata() {
+        return this.factoryMethodMetadata;
+    }
+
+
+    @Override
+    public ConfigurationClassBeanDefinition cloneBeanDefinition() {
+        return new ConfigurationClassBeanDefinition(this);
     }
 
     @Override

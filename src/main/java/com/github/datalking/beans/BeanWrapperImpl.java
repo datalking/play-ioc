@@ -18,12 +18,22 @@ public class BeanWrapperImpl implements BeanWrapper {
 //    private CachedIntrospectionResults cachedIntrospectionResults;
 
 
+    public BeanWrapperImpl() {
+    }
+
     public BeanWrapperImpl(Object o) {
         this.wrappedObject = o;
     }
 
     public BeanWrapperImpl(Class<?> clazz) throws IllegalAccessException, InstantiationException {
         this.wrappedObject = clazz.newInstance();
+    }
+
+    public void setBeanInstance(Object object) {
+        this.wrappedObject = object;
+        //this.rootObject = object;
+        //this.typeConverterDelegate = new TypeConverterDelegate(this, this.wrappedObject);
+        //setIntrospectionClass(object.getClass());
     }
 
     public final Object getWrappedInstance() {

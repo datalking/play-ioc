@@ -1,12 +1,17 @@
 package com.github.datalking.context.support;
 
 
+import com.github.datalking.beans.factory.config.BeanFactoryPostProcessor;
 import com.github.datalking.beans.factory.config.ConfigurableListableBeanFactory;
 import com.github.datalking.beans.factory.support.AbstractBeanFactory;
 import com.github.datalking.beans.factory.support.BeanDefinitionRegistry;
 import com.github.datalking.beans.factory.support.DefaultListableBeanFactory;
 import com.github.datalking.beans.factory.xml.XmlBeanDefinitionReader;
 import com.github.datalking.context.ConfigurableApplicationContext;
+import com.github.datalking.util.Assert;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * ApplicationContext 抽象类
@@ -17,7 +22,7 @@ public abstract class AbstractApplicationContext implements ConfigurableApplicat
 
     private String configLocation;
 
-//    private final List<BeanFactoryPostProcessor> beanFactoryPostProcessors = new ArrayList<BeanFactoryPostProcessor>();
+    private final List<BeanFactoryPostProcessor> beanFactoryPostProcessors = new ArrayList<>();
 //    private long startupDate;
 
     public AbstractApplicationContext() {
@@ -64,8 +69,8 @@ public abstract class AbstractApplicationContext implements ConfigurableApplicat
         // 读取xml配置文件
         obtainFreshBeanFactory();
 
-        // 激活各种BeanFactoryPostProcessor，如解析@Configuration
-        //invokeBeanFactoryPostProcessors(beanFactory);
+        // 激活各种BeanFactoryPostProcessor，如扫描@Configuration、@Bean、@ComponentScan
+        invokeBeanFactoryPostProcessors(beanFactory);
 
         // 注册拦截bean创建的bean处理器，这里只是注册，真正的调用是在getBean时候
         // 将各种Defnition转换成RootBeanDefinition
@@ -84,9 +89,16 @@ public abstract class AbstractApplicationContext implements ConfigurableApplicat
         }
     }
 
-    private void registerBeanPostProcessors(ConfigurableListableBeanFactory beanFactory) {
-        //PostProcessorRegistrationDelegate.registerBeanPostProcessors(beanFactory, this);
+    protected void invokeBeanFactoryPostProcessors(ConfigurableListableBeanFactory beanFactory) {
+
+        // beanFactoryPostProcessors默认为空
+        PostProcessorRegistrationDelegate.invokeBeanFactoryPostProcessors(beanFactory, getBeanFactoryPostProcessors());
+
     }
+
+//    private void registerBeanPostProcessors(ConfigurableListableBeanFactory beanFactory) {
+//        //PostProcessorRegistrationDelegate.registerBeanPostProcessors(beanFactory, this);
+//    }
 
     private void finishBeanFactoryInitialization(ConfigurableListableBeanFactory beanFactory) throws Exception {
 
@@ -94,5 +106,14 @@ public abstract class AbstractApplicationContext implements ConfigurableApplicat
         beanFactory.preInstantiateSingletons();
     }
 
+
+    public List<BeanFactoryPostProcessor> getBeanFactoryPostProcessors() {
+        return this.beanFactoryPostProcessors;
+    }
+
+    public void addBeanFactoryPostProcessor(BeanFactoryPostProcessor postProcessor) {
+        Assert.notNull(postProcessor, "BeanFactoryPostProcessor must not be null");
+        this.beanFactoryPostProcessors.add(postProcessor);
+    }
 
 }

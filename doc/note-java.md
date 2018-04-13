@@ -11,6 +11,7 @@ java笔记
     - getField()：只能获取类的 `public` 字段 
     - getDeclaredAnnotations()：获取元素上的所有注解，该方法将忽略继承的注解，如果没有注释直接存在于此元素上，则返回长度为零的一个数组
     - getAnnotations()：返回该程序元素上存在的所有注解
+    - Method.isBridge()：判断是否是桥接方法，对于覆盖父类或接口方法时有用
 - java 字符串 替换
     - replace函数只实现简单的替换功能，默认替换所有
     - replaceAll函数实现了正则表达式替换功能。

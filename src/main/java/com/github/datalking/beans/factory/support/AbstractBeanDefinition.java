@@ -42,6 +42,9 @@ public abstract class AbstractBeanDefinition implements BeanDefinition, Cloneabl
     protected AbstractBeanDefinition(BeanDefinition original) {
         setBeanClassName(original.getBeanClassName());
         setPropertyValues(new MutablePropertyValues(original.getPropertyValues()));
+        setLazyInit(original.isLazyInit());
+        setFactoryBeanName(original.getFactoryBeanName());
+        setFactoryMethodName(original.getFactoryMethodName());
 
         // todo 拷贝其他字段
         // if (original instanceof AbstractBeanDefinition) {

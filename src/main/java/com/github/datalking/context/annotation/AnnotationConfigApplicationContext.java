@@ -31,7 +31,12 @@ public class AnnotationConfigApplicationContext extends AbstractApplicationConte
     public AnnotationConfigApplicationContext(Class<?>... annotatedClasses) {
         this();
         register(annotatedClasses);
-        //refresh();
+
+        try {
+            refresh();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     public AnnotationConfigApplicationContext(String... basePackages) {

@@ -32,11 +32,11 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
         setBeanClassName(beanClassName);
     }
 
-    RootBeanDefinition(BeanDefinition original) {
+    public RootBeanDefinition(BeanDefinition original) {
         super(original);
     }
 
-    RootBeanDefinition(RootBeanDefinition original) {
+    public RootBeanDefinition(RootBeanDefinition original) {
         super(original);
         this.resolvedTargetType = original.resolvedTargetType;
     }

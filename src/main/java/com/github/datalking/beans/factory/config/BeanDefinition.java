@@ -21,6 +21,11 @@ public interface BeanDefinition {
 
     boolean isSingleton();
 
+    String getFactoryBeanName();
+    void setFactoryBeanName(String factoryBeanName);
+    String getFactoryMethodName();
+    void setFactoryMethodName(String factoryMethodName);
+
 //    void setDependsOn(String... dependsOn);
 //
 //    String[] getDependsOn();

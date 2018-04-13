@@ -7,6 +7,8 @@ import com.github.datalking.beans.PropertyValue;
 import com.github.datalking.beans.factory.config.AutowireCapableBeanFactory;
 import com.github.datalking.beans.factory.config.BeanDefinition;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -80,6 +82,12 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 //        Class beanClass = doResolveBeanClass(bd);
 //        bd.setBeanClass(beanClass);
 
+
+        // 根据ConfigurationClassBeanDefinition指定的FactoryMethod创建bean实例
+        if (bd.getFactoryMethodName() != null) {
+            return instantiateUsingFactoryMethod(beanName, bd, args);
+        }
+
         //todo 选择构造器
 
         //直接使用无参构造函数创建对象
@@ -106,18 +114,77 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 
     }
 
-    private Class<?> doResolveBeanClass(RootBeanDefinition bd) throws ClassNotFoundException {
-        String className = bd.getBeanClassName();
-        if (className != null) {
-            return Class.forName(className);
-        }
-        return null;
-    }
 
+    /**
+     * 使用工厂方法创建bean实例
+     *
+     * @param beanName     要创建的bean的名称
+     * @param bd           该bean的BeanDefiniiton
+     * @param explicitArgs 参数
+     * @return bean实例包装类
+     */
+    private BeanWrapper instantiateUsingFactoryMethod(final String beanName, final RootBeanDefinition bd, final Object[] explicitArgs) {
+
+        BeanWrapperImpl bw = new BeanWrapperImpl();
+
+        Object factoryBean = null;
+        Class<?> factoryClass;
+        //boolean isStatic;
+
+        try {
+
+            factoryBean = getBean(bd.getFactoryBeanName());
+            if (factoryBean == null) {
+                throw new Exception(beanName + "找不到FactoryBeanName");
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        factoryClass = factoryBean.getClass();
+
+        Method factoryMethodToUse = null;
+        //ArgumentsHolder argsHolderToUse = null;
+        //Object[] argsToUse = null;
+
+        Method[] maybeFactoryMethods = factoryClass.getDeclaredMethods();
+        for (Method m : maybeFactoryMethods) {
+            if (m.getName().equals(beanName)) {
+                factoryMethodToUse = m;
+            }
+        }
+
+        if (factoryMethodToUse == null) {
+            try {
+                throw new Exception(beanName + "找不到factoryMethodToUse");
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+
+
+        Object beanInstance = null;
+
+        try {
+            //beanInstance = this.beanFactory.getInstantiationStrategy().instantiate(mbd, beanName, this.beanFactory, factoryBean, factoryMethodToUse, argsToUse);
+
+            beanInstance = factoryMethodToUse.invoke(factoryBean);
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        } catch (InvocationTargetException e) {
+            e.printStackTrace();
+        }
+
+        if (beanInstance == null) {
+            return null;
+        }
+
+        bw.setBeanInstance(beanInstance);
+        return bw;
+    }
 
     /**
      * 将BeanDefinition的属性注入到bean实例
-     * todo 注解处理
      *
      * @param beanName 待添加属性的beanName
      * @param bd       要添加的属性定义
@@ -147,6 +214,25 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
         bw.setPropertyValues(new MutablePropertyValues(deepCopy));
 
 
+    }
+
+    public Class<?> doResolveBeanClass(RootBeanDefinition bd) throws ClassNotFoundException {
+        return doResolveBeanClass((AbstractBeanDefinition) bd);
+    }
+
+    public Class<?> doResolveBeanClass(AbstractBeanDefinition bd) {
+        String className = bd.getBeanClassName();
+        if (className != null) {
+
+            try {
+                return Class.forName(className);
+            } catch (ClassNotFoundException e) {
+                e.printStackTrace();
+            }
+
+        }
+
+        return null;
     }
 
 

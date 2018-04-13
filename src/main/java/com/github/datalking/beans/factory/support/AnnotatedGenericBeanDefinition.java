@@ -23,4 +23,9 @@ public class AnnotatedGenericBeanDefinition extends GenericBeanDefinition implem
         return metadata;
     }
 
+    @Override
+    public String toString() {
+        return "AnnoGenericBDef: " + super.toString();
+    }
+
 }

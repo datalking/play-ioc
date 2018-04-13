@@ -7,12 +7,17 @@ import java.util.Set;
  *
  * @author yaoo on 4/9/18
  */
-public interface AnnotationMetadata {
+public interface AnnotationMetadata extends ClassMetadata {
 
 
     Set<String> getAnnotationTypes();
+
     boolean hasAnnotation(String annotationName);
-//    Set<MethodMetadata> getAnnotatedMethods(String annotationName);
+
+    Set<MethodMetadata> getAnnotatedMethods(String annotationName);
+
+    Set<MethodMetadata> getAnnotatedMethods(Class<?> clazz);
+
 //    boolean hasAnnotatedMethods(String annotationName);
 
 

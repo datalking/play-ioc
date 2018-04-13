@@ -7,7 +7,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * 标注为会放到容器中的bean
+ * 标注为会放入容器中的bean
  *
  * @author yaoo on 4/2/18
  */

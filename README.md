@@ -63,10 +63,9 @@ System.out.println(beanAllStr);
 
 ## todo
 
-- [ ] 转换成RootBeanDefinition   
-- [ ] 手动注册bean生成BeanDefinition: @Configuration  @Bean   
-- [ ] aop织入顺序 @Order  
+- [ ] 支持@ComponentScan   
 - [ ] 基本aop功能 
+- [ ] aop织入顺序 @Order  
 - [ ] getBean By class   
 - [ ] xml 支持constructor-args元素   
 - [ ] 支持BeanPostProcessor   
@@ -76,7 +75,14 @@ System.out.println(beanAllStr);
 - [ ] 解决多重嵌套依赖问题   
 - [ ] xml中同名bean抛出异常   
 - [ ] 扫描指定包时利用asm实现所有子包.class文件的不加载，最初是预加载指定包获取bean信息   
+
+- [x] 手动通过注解注册bean生成BeanDefinition: @Configuration  @Bean   
+- [x] 各种BeanDefinition转换成RootBeanDefinition   
 - [x] ApplicationContext支持开启与关闭懒加载   
+
+## later
+- [ ] 使用@Configuration、@Bean时支持调用带参数的构造函数   
+- [ ] 使用@Configuration、@Bean时支持static方法   
 
 ## user guide
 - play-ioc支持的xml配置说明
