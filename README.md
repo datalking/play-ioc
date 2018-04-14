@@ -2,13 +2,13 @@
 >简单可控的IoC容器    
 
 ## target
-- 稳定健壮(ing)的IoC和AOP功能
+- 稳定健壮的IoC和AOP功能(ing)
 - 与Spring相同的使用方式
 - lite版仅支持IoC，不支持AOP，不推荐使用[play-ioc-lite](https://github.com/datalking/play-ioc-lite)
 
 ## overview
 - 支持从xml中读取bean配置
-- 支持从注解中读取bean配置
+- 支持从注解中读取bean配置，目前支持的注解：`@Configuration`、`@Bean`、`@ComponentScan`、`@Component`
 - ApplicationContext加载bean默认采用立即初始化，DefaultListableBeanFactory默认采用懒加载
 - 仅支持单例bean，不支持多实例
 - 目前暂不支持：
@@ -43,7 +43,7 @@ ApplicationContext ctx = new AnnotationConfigApplicationContext("com.github.data
 BeanAllStr beanAllStr = (BeanAllStr) applicationContext.getBean("beanAllStr");
 System.out.println(beanAllStr);
 ```
-#### 使用 [ApplicationContext](https://github.com/datalking/play-ioc/blob/master/src/test/java/com/github/datalking/context/ApplicationContextTest.java)
+#### 使用 [ClassPathXmlApplicationContext](https://github.com/datalking/play-ioc/blob/master/src/test/java/com/github/datalking/context/ApplicationContextTest.java)
 ```
 ApplicationContext applicationContext = new ClassPathXmlApplicationContext("beans-primitive.xml");
 BeanAllStr beanAllStr = (BeanAllStr) applicationContext.getBean("beanAllStr");
@@ -93,16 +93,18 @@ System.out.println(beanAllStr);
     - 顶层标签为 `<beans>`
     - `<bean>` 元素可配置 id,name,class属性，class必须，id和name都可选
     - `<property>` 元素可配置 name,value,ref属性，name必须，value和ref二选一
-- GenericBeanDefinition保存bean属性元数据，包括beanClass和propertyValues
+- BeanDefinition保存bean属性元数据，包括beanClass和propertyValues
     - beanClass在xml读取阶段是字符串，在实例创建阶段是class对象
     - propertyValues存储属性键值对，在xml读取阶段是都是字符串，特殊的是ref属性会处理成RuntimeBeanReference
 - BeanDefinitionReader读取bean配置  
-    - 最终存储到DefaultListableBeanFactory的beanDefinitionMap
-    - 此时bean所对应的class未加载，也未实例化
-- AbstractAutowireCapableBeanFactory的doCreate()方法会创建bean实例
-    - bean实例最终保存在DefaultSingletonBeanRegistry的singletonObjects中
-- 使用注解时，要用 `@Configuration`，表示一个配置类，同一个类上还可以配置 `@ComponentScan` 
-
+    - 最终存储到DefaultListableBeanFactory的 `beanDefinitionMap`
+    - 此时bean所对应的class可能未加载，一定未实例化，实例化一定发生在调用getBean()方法时
+- AbstractAutowireCapableBeanFactory的doCreateBean()方法会创建bean实例
+    - bean实例最终保存到DefaultSingletonBeanRegistry的 `singletonObjects` 
+- 注解相关
+    - 使用注解时，要用 `@Configuration`，表示一个配置类，相当于配置文件的 `<beans>`，同一个类上还可以配置 `@ComponentScan` 
+    - @ComponentScan不设置值时，默认扫描该类所在的包及所有子包
+    
 ## License
 [MIT](http://opensource.org/licenses/MIT)
 
