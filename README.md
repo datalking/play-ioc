@@ -63,8 +63,6 @@ System.out.println(beanAllStr);
 
 ## todo
 
-- [ ] 支持@ComponentScan   
-- [ ] 支持@ComponentScans   
 - [ ] 基本aop功能 
 - [ ] @Order 注解控制配置类的加载顺序
 - [ ] aop织入顺序 @Order  注解支持
@@ -75,6 +73,7 @@ System.out.println(beanAllStr);
 - [ ] 处理嵌套bean的问题   
 - [ ] xml中同名bean抛出异常   
 
+- [x] 支持@ComponentScan配置basePackages
 - [x] 手动通过注解注册bean生成BeanDefinition: @Configuration  @Bean   
 - [x] 各种BeanDefinition转换成RootBeanDefinition   
 - [x] ApplicationContext支持开启与关闭懒加载   
@@ -82,12 +81,12 @@ System.out.println(beanAllStr);
 ## later
 - [ ] 同一个类同时被@Component标记和@Bean工厂方法标记时，要抛出异常   
 - [ ] 支持@ComponentScan配置basePackageClasses   
+- [ ] 支持@ComponentScans   
 - [ ] 使用@Configuration、@Bean时支持调用带参数的构造函数   
 - [ ] 使用@Configuration、@Bean时支持static方法   
 - [ ] 扫描指定包时利用asm实现所有子包.class文件的不加载，最初是预加载指定包获取bean信息   
 - [ ] 注解支持 `@Named`, `@Injected`   
 - [ ] 解决多重嵌套依赖问题   
-- [ ] @Bean与@Component要进一步分离，现阶段@Bean要与@Component一起使用   
 
 ## user guide
 - play-ioc支持的xml配置说明

@@ -27,6 +27,7 @@ public class AnnoBeanMethodArgsTest {
     @Bean
     public HelloWorld helloWorld() {
 
+        // 调用有参数的构造函数
         return new HelloWorld("...");
     }
 
@@ -38,5 +39,6 @@ public class AnnoBeanMethodArgsTest {
         assertEquals("...", helloWorld.getMessage());
 
     }
+
 
 }

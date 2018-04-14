@@ -33,10 +33,14 @@ public class AnnoComponentScanTest {
     @Test
     public void testComponentScanBasePackages() throws Exception {
         ApplicationContext ctx = new AnnotationConfigApplicationContext(AnnoComponentScanTest.class);
+
         BeanStr01 bean = (BeanStr01) ctx.getBean("beanStr01");
         bean.setName("...");
-        //System.out.println(bean);
         assertEquals("...", bean.getName());
+
+        HelloWorld helloWorld = (HelloWorld) ctx.getBean("helloWorld");
+        helloWorld.setMessage("Hello World!");
+        assertEquals("Hello World!", helloWorld.getMessage());
 
     }
 

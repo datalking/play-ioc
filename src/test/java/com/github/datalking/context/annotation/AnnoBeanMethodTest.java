@@ -52,11 +52,6 @@ public class AnnoBeanMethodTest {
 
     }
 
-    @Test
-    public void testBeanMethodConstrutorArgs() throws Exception {
-        ApplicationContext ctx = new AnnotationConfigApplicationContext(AnnoBeanMethodTest.class);
-        HelloWorld helloWorld = (HelloWorld) ctx.getBean("helloWorld");
-        helloWorld.getMessage();
-    }
+
 
 }

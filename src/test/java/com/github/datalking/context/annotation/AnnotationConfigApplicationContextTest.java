@@ -5,6 +5,7 @@ import com.github.datalking.annotation.Component;
 import com.github.datalking.annotation.ComponentScan;
 import com.github.datalking.annotation.Configuration;
 import com.github.datalking.bean.HelloWorld;
+import com.github.datalking.bean.HelloWorldComponent;
 import com.github.datalking.context.ApplicationContext;
 import com.github.datalking.context.annotation.AnnotationConfigApplicationContext;
 import com.github.datalking.util.Assert;
@@ -38,8 +39,9 @@ public class AnnotationConfigApplicationContextTest {
         return new HelloWorld();
     }
 
+
     @Test
-    public void testAnnoConfigurationBeans() throws Exception {
+    public void testAnnoConfigurationBean() throws Exception {
         ApplicationContext ctx = new AnnotationConfigApplicationContext(AnnotationConfigApplicationContextTest.class);
         HelloWorld helloWorld = (HelloWorld) ctx.getBean("helloWorld");
         helloWorld.setMessage("Hello World!");
@@ -48,13 +50,12 @@ public class AnnotationConfigApplicationContextTest {
 
     /**
      * 指定扫描的包时，只能扫描@Component
-     * @throws Exception
      */
     @Test
     public void testScanBasePackageInput() throws Exception {
         String basePackage = "com.github.datalking.bean";
         ApplicationContext ctx = new AnnotationConfigApplicationContext(basePackage);
-        HelloWorld helloWorld = (HelloWorld) ctx.getBean("helloWorld");
+        HelloWorldComponent helloWorld = (HelloWorldComponent) ctx.getBean("helloWorldComponent");
         helloWorld.setMessage("...");
         assertEquals("...", helloWorld.getMessage());
 
