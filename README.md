@@ -2,7 +2,7 @@
 >简单可控的IoC容器    
 
 ## target
-- 稳定健壮的IoC和AOP功能（ing）
+- 稳定健壮(ing)的IoC和AOP功能
 - 与Spring相同的使用方式
 - lite版仅支持IoC，不支持AOP，不推荐使用[play-ioc-lite](https://github.com/datalking/play-ioc-lite)
 
@@ -64,8 +64,10 @@ System.out.println(beanAllStr);
 ## todo
 
 - [ ] 支持@ComponentScan   
+- [ ] 支持@ComponentScans   
 - [ ] 基本aop功能 
-- [ ] aop织入顺序 @Order  
+- [ ] @Order 注解控制配置类的加载顺序
+- [ ] aop织入顺序 @Order  注解支持
 - [ ] getBean By class   
 - [ ] 支持BeanPostProcessor   
 - [ ] 支持别名   
@@ -78,11 +80,14 @@ System.out.println(beanAllStr);
 - [x] ApplicationContext支持开启与关闭懒加载   
 
 ## later
+- [ ] 同一个类同时被@Component标记和@Bean工厂方法标记时，要抛出异常   
+- [ ] 支持@ComponentScan配置basePackageClasses   
 - [ ] 使用@Configuration、@Bean时支持调用带参数的构造函数   
 - [ ] 使用@Configuration、@Bean时支持static方法   
 - [ ] 扫描指定包时利用asm实现所有子包.class文件的不加载，最初是预加载指定包获取bean信息   
 - [ ] 注解支持 `@Named`, `@Injected`   
 - [ ] 解决多重嵌套依赖问题   
+- [ ] @Bean与@Component要进一步分离，现阶段@Bean要与@Component一起使用   
 
 ## user guide
 - play-ioc支持的xml配置说明
@@ -97,7 +102,7 @@ System.out.println(beanAllStr);
     - 此时bean所对应的class未加载，也未实例化
 - AbstractAutowireCapableBeanFactory的doCreate()方法会创建bean实例
     - bean实例最终保存在DefaultSingletonBeanRegistry的singletonObjects中
-
+- 使用注解时，要用 `@Configuration`，表示一个配置类，同一个类上还可以配置 `@ComponentScan` 
 
 ## License
 [MIT](http://opensource.org/licenses/MIT)

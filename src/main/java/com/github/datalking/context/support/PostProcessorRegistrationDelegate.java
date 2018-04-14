@@ -33,6 +33,7 @@ public class PostProcessorRegistrationDelegate {
 //            priorityOrderedPostProcessors.add(beanFactory.getBean(ppName, BeanDefinitionRegistryPostProcessor.class));
 //        }
 
+            // 添加默认的后置处理器
             ConfigurationClassPostProcessor configurationClassPostProcessor = new ConfigurationClassPostProcessor();
             priorityOrderedPostProcessors.add(configurationClassPostProcessor);
 

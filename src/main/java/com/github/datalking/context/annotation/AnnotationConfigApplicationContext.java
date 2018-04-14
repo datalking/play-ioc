@@ -30,19 +30,17 @@ public class AnnotationConfigApplicationContext extends AbstractApplicationConte
 
     public AnnotationConfigApplicationContext(Class<?>... annotatedClasses) {
         this();
+        // 注册当前class的BeanDefinition
         register(annotatedClasses);
+        // 各种后置处理器、立即实例化
+        refresh();
 
-        try {
-            refresh();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
     }
 
     public AnnotationConfigApplicationContext(String... basePackages) {
         this();
         scan(basePackages);
-        //refresh();
+        refresh();
     }
 
     /**

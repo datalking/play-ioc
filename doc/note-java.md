@@ -3,7 +3,17 @@ java笔记
 
 ## summary
 
+- java 注解
+    - AnnotatedElement接口代表程序中可以接受注解的程序元素.像Class Constructor FieldMethod Package这些类都实现了AnnotatedElement接口.
 
+- java 类型与实例判断
+    - instanceof
+        - 自身实例或子类实例 instanceof 自身类   返回true
+    - isInstance
+        - 自身类.class.isInstance(自身实例或子类实例)  返回true
+    - isAssignableFrom
+        - 自身类.class.isAssignableFrom(自身类或子类.class)  返回true
+        
 - AspectJ可以作为静态aop，在编译阶段完成对程序的修改
 
 - java 反射

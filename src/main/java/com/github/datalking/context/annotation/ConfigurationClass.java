@@ -9,6 +9,8 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 
 /**
+ * 被@Configuration注解标记的类
+ *
  * @author yaoo on 4/13/18
  */
 public class ConfigurationClass {
@@ -18,6 +20,7 @@ public class ConfigurationClass {
     private String beanName;
 
     private final Set<BeanMethod> beanMethods = new LinkedHashSet<>();
+
     // final Set<String> skippedBeanMethods = new HashSet<String>();
 
 
@@ -52,16 +55,15 @@ public class ConfigurationClass {
         return this.beanMethods;
     }
 
-//    @Override
-//    public boolean equals(Object other) {
-//        return (this == other ||
-//                (other instanceof ConfigurationClass && getMetadata().getClassName().equals(((ConfigurationClass) other).getMetadata().getClassName())));
-//    }
+    @Override
+    public boolean equals(Object other) {
+        return (this == other ||
+                (other instanceof ConfigurationClass && getMetadata().getClassName().equals(((ConfigurationClass) other).getMetadata().getClassName())));
+    }
 
     @Override
     public int hashCode() {
-//        return getMetadata().getClassName().hashCode();
-        return beanName.hashCode();
+        return getMetadata().getClassName().hashCode();
     }
 
 

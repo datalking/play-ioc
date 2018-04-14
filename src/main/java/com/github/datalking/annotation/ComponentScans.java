@@ -7,15 +7,15 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * 标注为需要自动装配的bean
+ * 自动扫描的多个包
  *
- * @author yaoo on 4/2/18
+ * @author yaoo on 4/13/18
  */
-@Target({ElementType.CONSTRUCTOR, ElementType.METHOD, ElementType.PARAMETER, ElementType.FIELD, ElementType.ANNOTATION_TYPE})
 @Retention(RetentionPolicy.RUNTIME)
+@Target(ElementType.TYPE)
 @Documented
-public @interface Autowired {
+public @interface ComponentScans {
 
-    boolean required() default true;
+    ComponentScan[] value();
 
 }

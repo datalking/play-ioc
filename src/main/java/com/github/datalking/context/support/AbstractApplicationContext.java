@@ -64,20 +64,26 @@ public abstract class AbstractApplicationContext implements ConfigurableApplicat
      * 默认采用立即初始化
      */
     @Override
-    public void refresh() throws Exception {
+    public void refresh() {
 
-        // 读取xml配置文件
-        obtainFreshBeanFactory();
+        try {
+            // 读取xml配置文件
+            obtainFreshBeanFactory();
 
-        // 激活各种BeanFactoryPostProcessor，如扫描@Configuration、@Bean、@ComponentScan
-        invokeBeanFactoryPostProcessors(beanFactory);
 
-        // 注册拦截bean创建的bean处理器，这里只是注册，真正的调用是在getBean时候
-        // 将各种Defnition转换成RootBeanDefinition
-        //registerBeanPostProcessors(beanFactory);
+            // 激活各种BeanFactoryPostProcessor，如扫描@Configuration、@Bean、@ComponentScan
+            invokeBeanFactoryPostProcessors(beanFactory);
 
-        // 通过调用getBean()创建非懒加载而是需要立即实例化的bean
-        finishBeanFactoryInitialization(beanFactory);
+            // 注册拦截bean创建的bean处理器，这里只是注册，真正的调用是在getBean时候
+            // 将各种Defnition转换成RootBeanDefinition
+            //registerBeanPostProcessors(beanFactory);
+
+            // 通过调用getBean()创建非懒加载而是需要立即实例化的bean
+            finishBeanFactoryInitialization(beanFactory);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
     }
 

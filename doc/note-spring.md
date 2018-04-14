@@ -3,10 +3,22 @@ Spring笔记
 
 ## summary
 
+- @Bean和@Component区别
+    - @Component是lite-mode，bean：class -> 1:1
+    - @Bean是显式声明bean定义，bean：class -> N:1
+    - @Component用于type，@Bean用于方法
+
+- `@Order` 注解可以控制配置类的加载顺序
+
+- 常用的后处理器
+    - BeanFactoryPostProcessor
+        - ConfigurationClassPostProcessor
+    - BeanPostProcessor
 
 - BeanDefinition
     - 对于GenericBD和ChildBD，parentName可以有
     - 对于RootBD，parentName不存在，getParentName()始终返回空
+    
 - spring扩展点
     - 用BeanPostProcessor定制bean实例化后的初始化逻辑，发生在 `doCreateBean()` -> `initializeBean()` 
         - 实现该接口可提供自定义（或默认地来覆盖容器）的实例化逻辑、依赖解析逻辑等

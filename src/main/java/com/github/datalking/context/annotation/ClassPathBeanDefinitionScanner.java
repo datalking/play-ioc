@@ -40,7 +40,13 @@ public class ClassPathBeanDefinitionScanner {
 
     }
 
-    private Set<BeanDefinitionHolder> doScan(String... basePackages) {
+    /**
+     * 执行扫描带有@Component标注的bean
+     *
+     * @param basePackages 要扫描的包
+     * @return beanDefinition的集合
+     */
+    public Set<BeanDefinitionHolder> doScan(String... basePackages) {
 
         Set<BeanDefinitionHolder> beanDefinitions = new LinkedHashSet<>();
 

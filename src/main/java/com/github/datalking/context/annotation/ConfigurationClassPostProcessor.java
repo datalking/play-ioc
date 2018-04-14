@@ -63,17 +63,21 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
             beanClass = ((AbstractAutowireCapableBeanFactory) registry).doResolveBeanClass((AbstractBeanDefinition) beanDef);
             ((AbstractBeanDefinition) beanDef).setBeanClass(beanClass);
 
-            // 扫描@Configuration
+            // 获取所有被@Configuration标注的类 对应的BeanDefinition
+            // spring的实现所设置的范围包括几乎所有可以表示@Bean的注解
             if (beanClass != null && beanClass.isAnnotationPresent(Configuration.class)) {
                 configCandidates.add(new BeanDefinitionHolder(beanDef, beanName));
             }
         }
 
+        // 若没有注解@Configuration标注，则直接返回
         if (configCandidates.isEmpty()) {
             return;
         }
 
-        ConfigurationClassParser parser = new ConfigurationClassParser();
+        // todo configCandidates按照指定的@Order排序
+
+        ConfigurationClassParser parser = new ConfigurationClassParser(registry);
 
         // 扫描@Bean、@ComponentScan、@Import
         parser.parse(configCandidates);
@@ -84,7 +88,6 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 
         // 将标注@Bean注解的bean注册到beanDefinitionMap
         reader.loadBeanDefinitions(configClasses);
-
 
     }
 
