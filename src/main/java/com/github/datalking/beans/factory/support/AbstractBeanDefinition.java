@@ -46,10 +46,13 @@ public abstract class AbstractBeanDefinition implements BeanDefinition, Cloneabl
         setFactoryBeanName(original.getFactoryBeanName());
         setFactoryMethodName(original.getFactoryMethodName());
 
-        // todo 拷贝其他字段
-        // if (original instanceof AbstractBeanDefinition) {
-        // setAutowireCandidate(original.isAutowireCandidate());
-
+        //  拷贝其他字段
+        if (original instanceof AbstractBeanDefinition) {
+            AbstractBeanDefinition originalAbd = (AbstractBeanDefinition) original;
+            if (originalAbd.hasBeanClass()) {
+                setBeanClass(originalAbd.getBeanClass());
+            }
+        }
     }
 
 

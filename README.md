@@ -12,6 +12,9 @@
 - ApplicationContext加载bean默认采用立即初始化，DefaultListableBeanFactory默认采用懒加载
 - 仅支持单例bean，不支持多实例
 - 目前暂不支持：
+    - 暂不支持@Autowired，需要显式配置Bean  
+    - 不支持introduction引入增强，仅支持weave  
+    - 不支持指定aop生成代理对象的方式，默认使用JdkDynamicAopProxy，目标对象未实现接口时使用CglibAopProxy
     - 不支持将bean的value类型配置为set,list,map，仅支持字符串和ref  
     - 不支持为bean指定别名
     - 不支持xml中指定扫描指定包，仅支持注解扫描指定包
@@ -72,6 +75,7 @@ System.out.println(beanAllStr);
 - [ ] xml新增支持constructor-args元素   
 - [ ] 处理嵌套bean的问题   
 - [ ] xml中同名bean抛出异常   
+- [ ] 处理AOP中的循环依赖   
 
 - [x] 支持@ComponentScan配置basePackages
 - [x] 手动通过注解注册bean生成BeanDefinition: @Configuration  @Bean   
@@ -87,6 +91,8 @@ System.out.println(beanAllStr);
 - [ ] 扫描指定包时利用asm实现所有子包.class文件的不加载，最初是预加载指定包获取bean信息   
 - [ ] 注解支持 `@Named`, `@Injected`   
 - [ ] 解决多重嵌套依赖问题   
+- [ ] ConfigurationClassParser.doProcessConfigurationClass()处理@ComponentScan后再次扫描@Configuration   
+- [ ] ConfigurationClassParser.doProcessConfigurationClass()处理@Import的循环引用问题   
 
 ## user guide
 - play-ioc支持的xml配置说明

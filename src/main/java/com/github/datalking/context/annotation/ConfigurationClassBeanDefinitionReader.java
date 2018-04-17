@@ -1,9 +1,11 @@
 package com.github.datalking.context.annotation;
 
+import com.github.datalking.annotation.meta.AnnotationMetadata;
 import com.github.datalking.annotation.meta.MethodMetadata;
 import com.github.datalking.beans.factory.support.BeanDefinitionRegistry;
 import com.github.datalking.beans.factory.support.ConfigurationClassBeanDefinition;
 
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -37,6 +39,10 @@ public class ConfigurationClassBeanDefinitionReader {
             loadBeanDefinitionsForBeanMethod(beanMethod);
         }
 
+        // 查找@Import注解上的bean定义，并注册BeanDefinition
+        loadBeanDefinitionsFromRegistrars(configClass.getImportBeanDefinitionRegistrars());
+
+
     }
 
     private void loadBeanDefinitionsForBeanMethod(BeanMethod beanMethod) {
@@ -51,7 +57,7 @@ public class ConfigurationClassBeanDefinitionReader {
 
         ConfigurationClassBeanDefinition beanDef = new ConfigurationClassBeanDefinition(configClass, metadata);
 
-        // 设置FactoryBean
+        // 设置FactoryBeanName和FactoryMethodName
         beanDef.setFactoryBeanName(configClass.getBeanName());
         beanDef.setFactoryMethodName(methodName);
 
@@ -59,5 +65,13 @@ public class ConfigurationClassBeanDefinitionReader {
 
     }
 
+
+    private void loadBeanDefinitionsFromRegistrars(Map<ImportBeanDefinitionRegistrar, AnnotationMetadata> registrars) {
+
+        for (Map.Entry<ImportBeanDefinitionRegistrar, AnnotationMetadata> entry : registrars.entrySet()) {
+            entry.getKey().registerBeanDefinitions(entry.getValue(), this.registry);
+        }
+
+    }
 
 }

@@ -38,7 +38,10 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
     protected Object createBean(String beanName, RootBeanDefinition bd, Object[] args) throws Exception {
 
         Class beanClass = doResolveBeanClass(bd);
-        bd.setBeanClass(beanClass);
+        // ConfigurationClassBD的beanClass是null
+        if (beanClass != null) {
+            bd.setBeanClass(beanClass);
+        }
 
         return doCreateBean(beanName, bd, args);
     }

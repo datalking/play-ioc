@@ -70,7 +70,7 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
             }
         }
 
-        // 若没有注解@Configuration标注，则直接返回
+        // 若没有注解@Configuration标注的类，则直接返回
         if (configCandidates.isEmpty()) {
             return;
         }

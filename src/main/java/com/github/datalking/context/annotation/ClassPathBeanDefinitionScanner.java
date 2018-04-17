@@ -19,6 +19,8 @@ import java.util.Set;
 import static com.github.datalking.beans.factory.support.BeanDefinitionReaderUtils.registerBeanDefinition;
 
 /**
+ * 基于路径的BeanDefinition扫描器
+ *
  * @author yaoo on 4/9/18
  */
 public class ClassPathBeanDefinitionScanner {

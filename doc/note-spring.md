@@ -3,6 +3,44 @@ Spring笔记
 
 ## summary
 
+
+- 经常使用的内部Bean名称
+    - org.springframework.context.annotation.internalConfigurationAnnotationProcessor
+        - class org.springframework.context.annotation.ConfigurationClassPostProcessor
+    - org.springframework.context.annotation.internalAutowiredAnnotationProcessor
+        - class org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor
+    - org.springframework.context.annotation.internalCommonAnnotationProcessor
+        - class org.springframework.context.annotation.CommonAnnotationBeanPostProcessor
+    - org.springframework.context.annotation.internalRequiredAnnotationProcessor
+        - class org.springframework.beans.factory.annotation.RequiredAnnotationBeanPostProcessor
+
+- BeanPostProcessor
+    - postProcessBeforeInitialization 初始化前扩展(执行init-method前)
+    - postProcessAfterInitialization 初始化后扩展(执行init-method后)
+- InstantiationAwareBeanPostProcessor
+    - postProcessBeforeInstantiation 对象实例化前扩展
+    - postProcessAfterInstantiation 对象实例化后扩展
+    - postProcessPropertyValues 属性依赖注入前扩展
+- SmartInstantiationAwareBeanPostProcessor
+    - predictBeanType 预测bean的类型，在beanFactory的getType时被调用
+    - determineCandidateConstructors 对象实例化时决定要使用的构造函数时被调用
+    - getEarlyBeanReference 循环依赖处理时获取Early对象引用时被调用
+
+- aop相关
+    - aspect：包含advice和point cut
+    - advice：增强处理
+    - advisor：将目标对象、增强行为和切入点三者结合起来，即通过Advisor可以定义那些目标对象的那些方法在什么地方使用这些增加的行为
+    - join point：要匹配的方法调用处
+    - point cut：公共可重用的匹配表达式
+    - 创建代理对象
+        - JdkDynamicAopProxy
+            - getProxy()
+        - CglibAopProxy
+            - getProxy()
+    - 获取匹配advice AnnotationAwareAspectAutoProxyCreator
+        - findCandidateAdvisors()
+        - findAdvisorsThatCanApply()
+
 - @Bean和@Component区别
     - @Component是lite-mode，bean：class -> 1:1
     - @Bean是显式声明bean定义，bean：class -> N:1
@@ -12,8 +50,10 @@ Spring笔记
 
 - 常用的后处理器
     - BeanFactoryPostProcessor
+        - 在容器注册了BeanDefinition之后，实例化之前执行，通过这个接口可以获取Bean定义的元数据并且修改它们，如Bean的scope属性、property值等，也可以操作beanFactory
         - ConfigurationClassPostProcessor
     - BeanPostProcessor
+        - 在Bean实例化完毕后执行，所以任何BeanPostProcessor都是在BeanFactoryPostProcessor之后执行的，可以实现自动注入、各种代理(AOP)等
 
 - BeanDefinition
     - 对于GenericBD和ChildBD，parentName可以有

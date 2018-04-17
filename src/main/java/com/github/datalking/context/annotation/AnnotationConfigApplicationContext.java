@@ -5,7 +5,7 @@ import com.github.datalking.context.support.AbstractApplicationContext;
 import com.github.datalking.util.Assert;
 
 /**
- * 读取注解的ApplicationContext
+ * 处理注解的ApplicationContext
  *
  * @author yaoo on 4/9/18
  */
@@ -29,6 +29,7 @@ public class AnnotationConfigApplicationContext extends AbstractApplicationConte
 
 
     public AnnotationConfigApplicationContext(Class<?>... annotatedClasses) {
+        // 初始化读取器和扫描器
         this();
         // 注册当前class的BeanDefinition
         register(annotatedClasses);

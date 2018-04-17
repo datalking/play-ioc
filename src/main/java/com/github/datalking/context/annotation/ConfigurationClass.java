@@ -5,22 +5,28 @@ import com.github.datalking.annotation.meta.StandardAnnotationMetadata;
 import com.github.datalking.util.Assert;
 
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
+import java.util.Map;
 import java.util.Set;
 
 /**
  * 被@Configuration注解标记的类
  *
+ *
  * @author yaoo on 4/13/18
  */
 public class ConfigurationClass {
 
-    private final AnnotationMetadata metadata;
-
     private String beanName;
+
+    private Object source;
+
+    private final AnnotationMetadata metadata;
 
     private final Set<BeanMethod> beanMethods = new LinkedHashSet<>();
 
+    private final Map<ImportBeanDefinitionRegistrar, AnnotationMetadata> importBeanDefinitionRegistrars = new LinkedHashMap<>();
     // final Set<String> skippedBeanMethods = new HashSet<String>();
 
 
@@ -53,6 +59,14 @@ public class ConfigurationClass {
 
     public Set<BeanMethod> getBeanMethods() {
         return this.beanMethods;
+    }
+
+    public void addImportBeanDefinitionRegistrar(ImportBeanDefinitionRegistrar registrar, AnnotationMetadata importingClassMetadata) {
+        this.importBeanDefinitionRegistrars.put(registrar, importingClassMetadata);
+    }
+
+    public Map<ImportBeanDefinitionRegistrar, AnnotationMetadata> getImportBeanDefinitionRegistrars() {
+        return this.importBeanDefinitionRegistrars;
     }
 
     @Override

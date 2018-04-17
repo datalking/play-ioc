@@ -1,5 +1,6 @@
 package com.github.datalking.annotation.meta;
 
+import java.lang.annotation.Annotation;
 import java.util.Map;
 import java.util.Set;
 
@@ -21,6 +22,7 @@ public interface AnnotationMetadata extends ClassMetadata {
 
     Map<String, Object> getAnnotationAttributes(Class<?> annotationName, boolean classValuesAsString);
 
+    Annotation[] getAnnotations();
 
 //    boolean hasAnnotatedMethods(String annotationName);
 

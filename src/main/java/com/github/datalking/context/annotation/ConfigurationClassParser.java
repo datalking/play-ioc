@@ -1,23 +1,26 @@
 package com.github.datalking.context.annotation;
 
 import com.github.datalking.annotation.Bean;
-import com.github.datalking.annotation.Component;
 import com.github.datalking.annotation.ComponentScan;
-import com.github.datalking.annotation.ComponentScans;
+import com.github.datalking.annotation.Import;
 import com.github.datalking.annotation.meta.AnnotationAttributes;
 import com.github.datalking.annotation.meta.AnnotationMetadata;
 import com.github.datalking.annotation.meta.MethodMetadata;
+import com.github.datalking.annotation.meta.StandardAnnotationMetadata;
 import com.github.datalking.beans.factory.config.AnnotatedBeanDefinition;
 import com.github.datalking.beans.factory.config.BeanDefinition;
 import com.github.datalking.beans.factory.config.BeanDefinitionHolder;
-import com.github.datalking.beans.factory.support.AbstractAutowireCapableBeanFactory;
-import com.github.datalking.beans.factory.support.AbstractBeanDefinition;
 import com.github.datalking.beans.factory.support.BeanDefinitionRegistry;
 
-import java.io.IOException;
-import java.util.Collections;
+import java.lang.annotation.Annotation;
+import java.util.ArrayDeque;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Deque;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -94,7 +97,7 @@ public class ConfigurationClassParser {
 //
 //                    Class clazz = ((AbstractAutowireCapableBeanFactory) registry).doResolveBeanClass(bd);
 //
-//                    // 将配置的各个包下的Component类扫描出来 todo 递归中止条件
+//                    // 将配置的各个包下的Component类扫描出来 full lite  todo递归中止条件
 //                    if (clazz.isAnnotationPresent(Component.class)) {
 //                        parse(clazz, holder.getBeanName());
 //                    }
@@ -102,6 +105,15 @@ public class ConfigurationClassParser {
 //                }
             }
         }
+
+
+        Set<ConfigurationClass> imports = getImports(configClass);
+        // 循环处理注解中含有@import的注解
+        processImports(configClass, imports);
+
+
+        // 循环处理注解中含有@import的类
+        //processImports(configClass, getImports(configClass), true);
 
         // ==== 扫描@Bean
         Set<MethodMetadata> beanMethods = retrieveBeanMethodMetadata(configClass);
@@ -112,6 +124,98 @@ public class ConfigurationClassParser {
 
 
     }
+
+    private void processImports(ConfigurationClass configClass, Collection<ConfigurationClass> importCandidates) {
+
+        if (importCandidates.isEmpty()) {
+            return;
+        }
+
+        for (ConfigurationClass c : importCandidates) {
+            Class curClass = ((StandardAnnotationMetadata) c.getMetadata()).getIntrospectedClass();
+            ImportBeanDefinitionRegistrar obj = null;
+            if (curClass.isAssignableFrom(ImportBeanDefinitionRegistrar.class)) {
+                try {
+                    obj = (ImportBeanDefinitionRegistrar) curClass.newInstance();
+                } catch (InstantiationException e) {
+                    e.printStackTrace();
+                } catch (IllegalAccessException e) {
+                    e.printStackTrace();
+                }
+            }
+
+            // 将@Import的class加入configClass的map
+            configClass.addImportBeanDefinitionRegistrar(obj, c.getMetadata());
+
+        }
+
+
+    }
+
+
+    private Set<ConfigurationClass> getImports(ConfigurationClass confClass) {
+        Set<ConfigurationClass> imports = new LinkedHashSet<>();
+        Set<Class> visited = new LinkedHashSet<>();
+
+        Annotation[] annos = confClass.getMetadata().getAnnotations();
+
+        Deque<AnnoClassTuple2> stack = new ArrayDeque<>();
+        for (Annotation annotation : annos) {
+            AnnoClassTuple2 annoClass = new AnnoClassTuple2(annotation, ((StandardAnnotationMetadata) confClass.getMetadata()).getIntrospectedClass());
+            stack.push(annoClass);
+        }
+//        stack.addAll(Arrays.asList(annos));
+
+        while (!stack.isEmpty()) {
+            AnnoClassTuple2 ac = stack.pop();
+
+            Class annoTypeClass = ac.getAnnotation().annotationType();
+
+            if (annoTypeClass.getName().equals(Import.class.getName())) {
+
+                Class<?>[] importedClass = ac.getClazz().getAnnotation(Import.class).value();
+
+                for (Class c : importedClass) {
+                    imports.add(new ConfigurationClass(c, c.getSimpleName()));
+                }
+
+            } else {
+                visited.add(annoTypeClass);
+
+                Annotation[] annos2 = annoTypeClass.getAnnotations();
+                for (Annotation a : annos2) {
+                    AnnoClassTuple2 ac2 = new AnnoClassTuple2(a, annoTypeClass);
+                    if (!visited.contains(a.annotationType()) && !stack.contains(ac2)) {
+                        stack.push(ac2);
+
+                    }
+                }
+
+            }
+
+        }
+
+//        collectImports(confClass, imports, visited);
+        return imports;
+    }
+
+
+//    private void collectImports(ConfigurationClass configClass, Set<ConfigurationClass> imports, Set<ConfigurationClass> visited) {
+//
+//        if (visited.add(configClass)) {
+//
+//            for (ConfigurationClass annotation : configClass.getAnnotations()) {
+//
+//                String annName = annotation.getMetadata().getClassName();
+//                if (!annName.equals(Import.class.getName()) && !annName.startsWith("java")) {
+//                    collectImports(annotation, imports, visited);
+//                }
+//            }
+//
+//            imports.addAll(configClass.getAnnotationAttributes(Import.class.getName(), "value"));
+//        }
+//
+//    }
 
     private Set<MethodMetadata> retrieveBeanMethodMetadata(ConfigurationClass configClass) {
 

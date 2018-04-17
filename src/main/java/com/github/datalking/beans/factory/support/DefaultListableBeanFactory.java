@@ -123,10 +123,32 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
         return this.beanDefinitionNames.toArray(new String[this.beanDefinitionNames.size()]);
     }
 
-//    @Override
-//    public String[] getBeanNamesForType(Class<?> type) {
-//        return new String[0];
-//    }
+
+    @Override
+    public String[] getBeanNamesForType(Class<?> type) {
+
+        List<String> result = new ArrayList<>();
+        for (String beanName : this.beanDefinitionNames) {
+
+            // 各种BeanDefinition添加进 mergedBeanDefinitions
+            RootBeanDefinition bd = getMergedLocalBeanDefinition(beanName);
+
+            if (bd.hasBeanClass()) {
+                if (type.isAssignableFrom(bd.getBeanClass())) {
+                    result.add(beanName);
+                }
+            }
+
+        }
+
+        if (result.size() == 0) {
+            return new String[0];
+        }
+
+        return result.toArray(new String[result.size()]);
+    }
+
+
 //    @Override
 //    public <T> Map<String, T> getBeansOfType(Class<T> type) {
 //        return null;

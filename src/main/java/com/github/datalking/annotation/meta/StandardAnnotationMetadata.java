@@ -26,6 +26,11 @@ public class StandardAnnotationMetadata extends StandardClassMetadata implements
     }
 
     @Override
+    public Annotation[] getAnnotations() {
+        return annotations;
+    }
+
+    @Override
     public Set<String> getAnnotationTypes() {
         Set<String> types = new LinkedHashSet<>();
         for (Annotation ann : this.annotations) {
