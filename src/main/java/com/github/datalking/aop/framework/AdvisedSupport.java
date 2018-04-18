@@ -5,6 +5,7 @@ import com.github.datalking.aop.EmptyTargetSource;
 import com.github.datalking.aop.TargetSource;
 import org.aopalliance.aop.Advice;
 
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -14,7 +15,7 @@ import java.util.List;
  *
  * @author yaoo on 4/18/18
  */
-public class AdvisedSupport extends ProxyConfig {
+public class AdvisedSupport extends ProxyConfig implements Advised {
 
     public static final TargetSource EMPTY_TARGET_SOURCE = EmptyTargetSource.INSTANCE;
 
@@ -24,6 +25,8 @@ public class AdvisedSupport extends ProxyConfig {
     private List<Class<?>> interfaces = new ArrayList<Class<?>>();
 
     private List<Advisor> advisors = new LinkedList<>();
+
+    AdvisorChainFactory advisorChainFactory = new DefaultAdvisorChainFactory();
 
 
     public TargetSource getTargetSource() {
@@ -42,10 +45,9 @@ public class AdvisedSupport extends ProxyConfig {
 
     }
 
-    public void addAdvice(Advice advice)  {
+    public void addAdvice(Advice advice) {
 
     }
 
 
-
-    }
+}

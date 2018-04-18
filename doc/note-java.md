@@ -1,6 +1,10 @@
 # note-java
 java笔记
 
+## faq
+
+- java 8 接口 静态方法 原理
+
 ## summary
 
 - java 注解

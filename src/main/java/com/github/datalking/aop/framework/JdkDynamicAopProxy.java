@@ -63,7 +63,7 @@ public final class JdkDynamicAopProxy implements AopProxy, InvocationHandler, Se
         //没有配置通知
         if (chain.isEmpty()) {
             //直接调用目标对象的方法
-            retVal = AopProxyUtils.invokeJoinpointUsingReflection(target, method, args);
+            retVal = AopUtils.invokeJoinpointUsingReflection(target, method, args);
 
         } else {
             //配置了通知，创建一个MethodInvocation
