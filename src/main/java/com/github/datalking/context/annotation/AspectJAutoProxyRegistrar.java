@@ -34,7 +34,7 @@ public class AspectJAutoProxyRegistrar implements ImportBeanDefinitionRegistrar 
 
         RootBeanDefinition beanDefinition = new RootBeanDefinition(cls);
 
-        beanDefinition.getPropertyValues().addPropertyValue("order", -9999);
+//        beanDefinition.getPropertyValues().addPropertyValue("order", -9999);
         registry.registerBeanDefinition(AUTO_PROXY_CREATOR_BEAN_NAME, beanDefinition);
         return beanDefinition;
     }

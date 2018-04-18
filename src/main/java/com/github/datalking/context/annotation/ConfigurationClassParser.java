@@ -134,7 +134,7 @@ public class ConfigurationClassParser {
         for (ConfigurationClass c : importCandidates) {
             Class curClass = ((StandardAnnotationMetadata) c.getMetadata()).getIntrospectedClass();
             ImportBeanDefinitionRegistrar obj = null;
-            if (curClass.isAssignableFrom(ImportBeanDefinitionRegistrar.class)) {
+            if (ImportBeanDefinitionRegistrar.class.isAssignableFrom(curClass)) {
                 try {
                     obj = (ImportBeanDefinitionRegistrar) curClass.newInstance();
                 } catch (InstantiationException e) {
