@@ -1,7 +1,7 @@
 package com.github.datalking.context.annotation;
 
 import com.github.datalking.annotation.meta.AnnotationMetadata;
-import com.github.datalking.aop.annotation.AnnotationAwareAspectJAutoProxyCreator;
+import com.github.datalking.aop.aspectj.AnnotationAwareAspectJAutoProxyCreator;
 import com.github.datalking.beans.factory.config.BeanDefinition;
 import com.github.datalking.beans.factory.support.BeanDefinitionRegistry;
 import com.github.datalking.beans.factory.support.RootBeanDefinition;
@@ -15,7 +15,7 @@ public class AspectJAutoProxyRegistrar implements ImportBeanDefinitionRegistrar 
     /**
      * 创建代理对象的类相应bean的内部名称
      */
-    public static final String AUTO_PROXY_CREATOR_BEAN_NAME = "play.aop.annotation.internalAnnotationAwareAspectJAutoProxyCreator";
+    public static final String AUTO_PROXY_CREATOR_BEAN_NAME = "play.aop.aspectj.internalAnnotationAwareAspectJAutoProxyCreator";
 
     /**
      * 注册 AnnotationAwareAspectJAutoProxyCreator  beanDefinition

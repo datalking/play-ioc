@@ -4,6 +4,21 @@ Spring笔记
 ## summary
 
 
+- Advice接口是AOP联盟定义的一个空的标记接口，Advice有几个子接口：
+    - BeforeAdvice，前置增强，意思是在我们的目标类之前调用的增强。这个接口也没有定义任何方法。
+        - MethodBeforeAdvice接口，是BeforeAdvice的子接口，表示在方法前调用的增强，方法前置增强不能阻止方法的调用，但是能抛异常来使目标方法不继续执行。
+    - AfterReturningAdvice，方法正常返回前的增强，该增强可以看到方法的返回值，但是不能更改返回值，该接口有一个方法afterReturning
+    - ThrowsAdvice，抛出异常时候的增强，也是一个标志接口，没有定义任何方法。
+    - Interceptor，拦截器，也没有定义任何方法，表示一个通用的拦截器，不属于Spring，是AOP联盟定义的接口
+        - MethodInterceptor不属于Spring，是AOP联盟定义的接口，是Interceptor的子接口，我们通常叫做环绕增强，抽象方法是 `Object invoke(MethodInvocation invocation) throws Throwable;`
+        - MethodInterceptor用来在目标方法调用前后做一些事情，参数MethodInvocation是一个方法调用的连接点，返回的是invocation.proceed()方法的返回值
+        - JointPoint接口，是一个通用的运行时连接点，运行时连接点是在一个静态连接点发生的事件
+        - Invocation接口是Joinpoint的子接口，表示程序的调用，一个Invocation就是一个连接点，可以被拦截器拦截
+        - MethodInvocation接口是Invocation的子接口，用来描述一个方法的调用。
+        - ConstructorInvocation接口是Invocation的子接口，描述的是构造器的调用
+    - DynamicIntroductionAdvice，动态引介增强，有一个方法implementsInterface。
+
+
 - 经常使用的内部Bean名称
     - org.springframework.context.annotation.internalConfigurationAnnotationProcessor
         - class org.springframework.context.annotation.ConfigurationClassPostProcessor
@@ -176,3 +191,15 @@ Spring笔记
 - BeanFactory
     - BeanFactory 有三个子类：ListableBeanFactory、HierarchicalBeanFactory 和 AutowireCapableBeanFactory。      
     - 最终的默认实现类是 DefaultListableBeanFactory，实现了所有的接口  
+
+- objenesis
+    - objenesis是一个小型java类库用来实例化一个特定class的对象。
+    - 使用场合：Java已经支持使用Class.newInstance()动态实例化类的实例。但是类必须拥有一个合适的构造器。有很多场景下不能使用这种方式实例化类，比如：
+        - 构造器需要参数
+        - 构造器有side effects
+        - 构造器会抛异常
+        - 因此，在类库中经常会有类必须拥有一个默认构造器的限制。Objenesis通过绕开对象实例构造器来克服这个限制。
+    - 典型使用:实例化一个对象而不调用构造器是一个特殊的任务，然而在一些特定的场合是有用的：
+        - 序列化，远程调用和持久化 -对象需要实例化并存储为到一个特殊的状态，而没有调用代码。
+        - 代理，AOP库和Mock对象 -类可以被子类继承而子类不用担心父类的构造器
+        - 容器框架 -对象可以以非标准的方式被动态实例化。
