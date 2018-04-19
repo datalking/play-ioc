@@ -9,23 +9,38 @@ import org.aopalliance.aop.Advice;
  */
 public interface Advised {
 
-
-    boolean isProxyTargetClass();
     Class<?> getTargetClass();
 
-//    Class<?>[] getProxiedInterfaces();
-//    boolean isInterfaceProxied(Class<?> intf);
-//    void setTargetSource(TargetSource targetSource);
-//    Advisor[] getAdvisors();
-//    void addAdvisor(Advisor advisor) ;
-//    void addAdvisor(int pos, Advisor advisor) ;
-//    boolean removeAdvisor(Advisor advisor);
-//    int indexOf(Advisor advisor);
-//    boolean replaceAdvisor(Advisor a, Advisor b) ;
-//
-//    void addAdvice(Advice advice) ;
-//    void addAdvice(int pos, Advice advice) ;
-//    boolean removeAdvice(Advice advice);
-//    int indexOf(Advice advice);
+    boolean isProxyTargetClass();
+
+    Class<?>[] getProxiedInterfaces();
+
+    boolean isInterfaceProxied(Class<?> intf);
+
+    void setTargetSource(TargetSource targetSource);
+
+    TargetSource getTargetSource();
+
+    Advisor[] getAdvisors();
+
+    void addAdvisor(Advisor advisor);
+
+    void addAdvisor(int pos, Advisor advisor);
+
+    boolean removeAdvisor(Advisor advisor);
+
+    void removeAdvisor(int index);
+
+    int indexOf(Advisor advisor);
+
+    boolean replaceAdvisor(Advisor a, Advisor b);
+
+    void addAdvice(Advice advice);
+
+    void addAdvice(int pos, Advice advice);
+
+    boolean removeAdvice(Advice advice);
+
+    int indexOf(Advice advice);
 
 }

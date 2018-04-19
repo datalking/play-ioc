@@ -8,6 +8,9 @@ public interface BeanFactory {
     //可以用别名查找
     Object getBean(String name) throws Exception;
 
+    Class<?> getType(String name) ;
+
+
     //类型可以是接口或者子类,但不能是null
 //    <T> T getBean(Class<T> requiredType) throws Exception;
 //    <T> T getBean(String name, Class<T> requiredType) throws Exception;
@@ -16,7 +19,6 @@ public interface BeanFactory {
 //    boolean containsBean(String name);
 
 //    String[] getAliases(String name);
-//    Class<?> getType(String name) throws NoSuchBeanDefinitionException;
 
 
 //    boolean isPrototype(String name) throws NoSuchBeanDefinitionException;

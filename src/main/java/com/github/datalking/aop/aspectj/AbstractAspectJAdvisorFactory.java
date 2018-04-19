@@ -10,7 +10,7 @@ public abstract class AbstractAspectJAdvisorFactory implements AspectJAdvisorFac
 
     @Override
     public boolean isAspect(Class<?> clazz) {
-        Assert.notNull(clazz, "判断切面的类不能为空");
+        Assert.notNull(clazz, "作为切面的类不能为空");
         return clazz.isAnnotationPresent(Aspect.class);
     }
 

@@ -1,9 +1,11 @@
 package com.github.datalking.aop.framework;
 
 import java.io.Serializable;
-import java.lang.reflect.Proxy;
 
 /**
+ * AOP代理创建工厂 默认实现类
+ * 决定创建代理的方式
+ *
  * @author yaoo on 4/18/18
  */
 public class DefaultAopProxyFactory implements AopProxyFactory, Serializable {
@@ -14,9 +16,10 @@ public class DefaultAopProxyFactory implements AopProxyFactory, Serializable {
         //if (config.isProxyTargetClass() || config.isOptimize() ||
 
         Class<?> targetClass = config.getTargetClass();
+
         if (targetClass == null) {
             try {
-                throw new Exception("TargetSource cannot determine target class: " + "Either an interface or a target is required for proxy creation.");
+                throw new Exception("创建代理的对象不能为空");
             } catch (Exception e) {
                 e.printStackTrace();
             }

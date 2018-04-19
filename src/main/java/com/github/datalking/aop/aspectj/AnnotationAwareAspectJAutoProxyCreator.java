@@ -4,6 +4,7 @@ import com.github.datalking.aop.Advisor;
 import com.github.datalking.beans.factory.config.ConfigurableListableBeanFactory;
 import com.github.datalking.util.Assert;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
 
@@ -39,7 +40,8 @@ public class AnnotationAwareAspectJAutoProxyCreator extends AspectJAwareAdvisorA
     protected List<Advisor> findCandidateAdvisors() {
 
         // 先调用父类的方法获取xml文件中配置的AOP advisor
-        List<Advisor> advisors = super.findCandidateAdvisors();
+        //List<Advisor> advisors = super.findCandidateAdvisors();
+        List<Advisor> advisors = new ArrayList<>();
 
         // 获取有@Aspect的Bean上的注解增强
         advisors.addAll(this.aspectJAdvisorsBuilder.buildAspectJAdvisors());

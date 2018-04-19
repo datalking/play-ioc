@@ -2,11 +2,16 @@ package com.github.datalking.aop.aspectj;
 
 import com.github.datalking.aop.Advisor;
 import com.github.datalking.beans.factory.ListableBeanFactory;
+import org.aspectj.lang.reflect.PerClauseKind;
 
+import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * 为了方便创建自动代理的工具类
+ * 从BeanFactory查找所有@Aspect bean并创建advisor，便于自动创建代理
  *
  * @author yaoo on 4/18/18
  */
@@ -17,6 +22,10 @@ public class BeanFactoryAspectJAdvisorsBuilder {
     private final AspectJAdvisorFactory advisorFactory;
 
     private volatile List<String> aspectBeanNames;
+
+    private final Map<String, List<Advisor>> advisorsCache = new ConcurrentHashMap<String, List<Advisor>>();
+
+    private final Map<String, MetadataAwareAspectInstanceFactory> aspectFactoryCache = new ConcurrentHashMap<>();
 
 
     public BeanFactoryAspectJAdvisorsBuilder(ListableBeanFactory beanFactory) {
@@ -33,7 +42,83 @@ public class BeanFactoryAspectJAdvisorsBuilder {
      */
     public List<Advisor> buildAspectJAdvisors() {
 
-        return null;
+        List<String> aspectNames = this.aspectBeanNames;
+
+        if (aspectNames == null) {
+            {
+                synchronized (this) {
+                    aspectNames = this.aspectBeanNames;
+                    if (aspectNames == null) {
+
+                        List<Advisor> advisors = new LinkedList<>();
+                        aspectNames = new LinkedList<>();
+
+                        // 获取所有的beanNames
+                        String[] beanNames = beanFactory.getBeanNamesForType(Object.class);
+
+                        //循环所有beanName找出对应的增强方法
+                        for (String beanName : beanNames) {
+
+                            // 获取Bean的class列表
+                            Class<?> beanType = this.beanFactory.getType(beanName);
+                            if (beanType == null) {
+                                continue;
+                            }
+                            // 判断是class上否包含@Aspect注解
+                            if (this.advisorFactory.isAspect(beanType)) {
+                                aspectNames.add(beanName);
+
+                                AspectMetadata amd = new AspectMetadata(beanType, beanName);
+                                if (amd.getAjType().getPerClause().getKind() == PerClauseKind.SINGLETON) {
+                                    MetadataAwareAspectInstanceFactory factory = new BeanFactoryAspectInstanceFactory(this.beanFactory, beanName);
+
+                                    //==== 解析标记AspectJ注解的增强方法
+                                    List<Advisor> classAdvisors = this.advisorFactory.getAdvisors(factory);
+
+                                    if (this.beanFactory.isSingleton(beanName)) {
+                                        this.advisorsCache.put(beanName, classAdvisors);
+                                    } else {
+                                        this.aspectFactoryCache.put(beanName, factory);
+                                    }
+
+                                    advisors.addAll(classAdvisors);
+
+                                } else {
+
+                                    MetadataAwareAspectInstanceFactory factory = new PrototypeAspectInstanceFactory(this.beanFactory, beanName);
+                                    this.aspectFactoryCache.put(beanName, factory);
+                                    advisors.addAll(this.advisorFactory.getAdvisors(factory));
+                                }
+                            }
+                        }
+                        this.aspectBeanNames = aspectNames;
+                        return advisors;
+                    }
+                }
+            }
+        }
+
+        if (aspectNames.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        //记录在缓存中
+        List<Advisor> advisors = new LinkedList<>();
+
+        for (String aspectName : aspectNames) {
+            List<Advisor> cachedAdvisors = this.advisorsCache.get(aspectName);
+
+            if (cachedAdvisors != null) {
+                advisors.addAll(cachedAdvisors);
+            } else {
+                MetadataAwareAspectInstanceFactory factory = this.aspectFactoryCache.get(aspectName);
+                advisors.addAll(this.advisorFactory.getAdvisors(factory));
+            }
+
+        }
+
+        return advisors;
+
     }
 
 

@@ -123,7 +123,9 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
         return this.beanDefinitionNames.toArray(new String[this.beanDefinitionNames.size()]);
     }
 
-
+    /**
+     * 获取指定class类型的bean名称
+     */
     @Override
     public String[] getBeanNamesForType(Class<?> type) {
 

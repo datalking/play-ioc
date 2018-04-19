@@ -1,4 +1,4 @@
-package com.github.datalking.core;
+package com.github.datalking.common;
 
 /**
  * 标记顺序的接口

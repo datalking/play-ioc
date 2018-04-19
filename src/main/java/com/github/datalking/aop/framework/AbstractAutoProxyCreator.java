@@ -5,7 +5,6 @@ import com.github.datalking.aop.TargetSource;
 import com.github.datalking.beans.PropertyValues;
 import com.github.datalking.beans.factory.BeanFactory;
 import com.github.datalking.beans.factory.BeanFactoryAware;
-import com.github.datalking.beans.factory.config.ConfigurableListableBeanFactory;
 import com.github.datalking.beans.factory.config.SmartInstantiationAwareBeanPostProcessor;
 
 import java.beans.PropertyDescriptor;
@@ -39,7 +38,7 @@ public abstract class AbstractAutoProxyCreator extends ProxyConfig
 
 
     @Override
-    public Object postProcessBeforeInstantiation(Class<?> beanClass, String beanName) throws BeansException {
+    public Object postProcessBeforeInstantiation(Class<?> beanClass, String beanName) {
         return null;
     }
 

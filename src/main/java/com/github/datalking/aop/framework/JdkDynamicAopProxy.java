@@ -1,6 +1,7 @@
 package com.github.datalking.aop.framework;
 
 import com.github.datalking.aop.TargetSource;
+import com.github.datalking.aop.support.AopUtils;
 import org.aopalliance.intercept.MethodInvocation;
 
 import java.io.Serializable;
@@ -10,6 +11,8 @@ import java.lang.reflect.Proxy;
 import java.util.List;
 
 /**
+ * 基于JDK动态代理创建代理对象
+ *
  * @author yaoo on 4/18/18
  */
 public final class JdkDynamicAopProxy implements AopProxy, InvocationHandler, Serializable {
@@ -26,10 +29,12 @@ public final class JdkDynamicAopProxy implements AopProxy, InvocationHandler, Se
     public Object getProxy() {
 
         ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+
         // 获取接口
-        Class<?>[] proxiedInterfaces = AopProxyUtils.completeProxiedInterfaces(this.advised, true);
+        Class<?>[] proxiedInterfaces = AopUtils.completeProxiedInterfaces(this.advisedSupport);
 
         Object newObj = Proxy.newProxyInstance(classLoader, proxiedInterfaces, this);
+
         return newObj;
     }
 
@@ -38,8 +43,7 @@ public final class JdkDynamicAopProxy implements AopProxy, InvocationHandler, Se
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
 
         MethodInvocation invocation;
-        //Object oldProxy = null;
-        //boolean setProxyContext = false;
+
         //代理的目标对象封装
         TargetSource targetSource = advisedSupport.targetSource;
         // 目标对象的class
@@ -54,9 +58,9 @@ public final class JdkDynamicAopProxy implements AopProxy, InvocationHandler, Se
             targetClass = target.getClass();
         }
 
-        //获取配置的通知Advicelian
-        List chain = this.advisedSupport.advisorChainFactory.getInterceptorsAndDynamicInterceptionAdvice(
-                this.advisedSupport, proxy, method, targetClass);
+        //获取配置的通知Advice
+        List chain = this.advisedSupport.advisorChainFactory
+                .getInterceptorsAndDynamicInterceptionAdvice(advisedSupport, method, targetClass);
 
         Object retVal;
 
@@ -77,6 +81,10 @@ public final class JdkDynamicAopProxy implements AopProxy, InvocationHandler, Se
         if (retVal != null && retVal == target) {
             //返回值为自己
             retVal = proxy;
+        }
+        Class<?> returnType = method.getReturnType();
+        if (retVal == null && returnType != Void.TYPE && returnType.isPrimitive()) {
+            throw new Exception("Null return value from advice does not match primitive return type for: " + method);
         }
 
         //返回

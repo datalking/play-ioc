@@ -1,7 +1,7 @@
 package com.github.datalking.aop.support;
 
 import com.github.datalking.aop.PointcutAdvisor;
-import com.github.datalking.core.Ordered;
+import com.github.datalking.common.Ordered;
 import org.aopalliance.aop.Advice;
 
 import java.io.Serializable;

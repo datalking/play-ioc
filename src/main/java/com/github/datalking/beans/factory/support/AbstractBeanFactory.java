@@ -32,12 +32,30 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
 
 
     @Override
+    public Class<?> getType(String name) {
+        // String beanName = transformedBeanName(name);
+
+        Object beanInstance = null;
+        try {
+            beanInstance = getSingleton(name, false);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        if (beanInstance != null) {
+            return beanInstance.getClass();
+        }
+        return null;
+    }
+
+    @Override
     public Object getBean(String name) throws Exception {
 
         return doGetBean(name, null, null, false);
     }
 
-    protected <T> T doGetBean(final String name, final Class<T> requiredType, final Object[] args, boolean typeCheckOnly) throws Exception {
+    protected <T> T doGetBean(final String name, final Class<T> requiredType, final Object[] args,
+                              boolean typeCheckOnly) throws Exception {
 
         //将别名解析为bean唯一名称
         //final String name = transformedBeanName(name);
@@ -89,7 +107,8 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
         return getMergedBeanDefinition(beanName, bd, null);
     }
 
-    protected RootBeanDefinition getMergedBeanDefinition(String beanName, BeanDefinition bd, BeanDefinition containingBd) {
+    protected RootBeanDefinition getMergedBeanDefinition(String beanName, BeanDefinition bd, BeanDefinition
+            containingBd) {
 
         synchronized (this.mergedBeanDefinitions) {
             RootBeanDefinition mbd = null;

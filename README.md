@@ -15,6 +15,7 @@
     - 暂不支持@Autowired，需要显式配置Bean  
     - 不支持introduction引入增强，仅支持weave  
     - 不支持指定aop生成代理对象的方式，默认使用JdkDynamicAopProxy，目标对象未实现接口时使用CglibAopProxy
+    - 不支持动态代理指定构造函数参数
     - 不支持将bean的value类型配置为set,list,map，仅支持字符串和ref  
     - 不支持为bean指定别名
     - 不支持xml中指定扫描指定包，仅支持注解扫描指定包
