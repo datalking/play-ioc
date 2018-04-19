@@ -43,11 +43,6 @@ public class LazySingletonAspectInstanceFactoryDecorator implements MetadataAwar
         return this.maaif.getAspectMetadata();
     }
 
-//    @Override
-//    public Object getAspectCreationMutex() {
-//        return this.maaif.getAspectCreationMutex();
-//    }
-
     @Override
     public int getOrder() {
         return this.maaif.getOrder();

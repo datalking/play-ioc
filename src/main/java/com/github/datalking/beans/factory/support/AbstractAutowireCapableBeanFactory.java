@@ -29,13 +29,13 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 
     @Override
     @SuppressWarnings("unchecked")
-    public <T> T createBean(Class<T> beanClass) throws Exception {
+    public <T> T createBean(Class<T> beanClass) {
         BeanDefinition bd = new RootBeanDefinition();
         return (T) createBean(beanClass.getName(), (RootBeanDefinition) bd, null);
     }
 
     @Override
-    protected Object createBean(String beanName, RootBeanDefinition bd, Object[] args) throws Exception {
+    protected Object createBean(String beanName, RootBeanDefinition bd, Object[] args) {
 
         Class beanClass = doResolveBeanClass(bd);
         // ConfigurationClassBD的beanClass是null
@@ -47,7 +47,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
     }
 
 
-    protected Object doCreateBean(final String beanName, final RootBeanDefinition bd, final Object[] args) throws Exception {
+    protected Object doCreateBean(final String beanName, final RootBeanDefinition bd, final Object[] args) {
 
         BeanWrapper instanceWrapper = null;
 
@@ -80,7 +80,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
         return bean;
     }
 
-    protected BeanWrapper createBeanInstance(String beanName, RootBeanDefinition bd, Object[] args) throws Exception {
+    protected BeanWrapper createBeanInstance(String beanName, RootBeanDefinition bd, Object[] args)  {
 
 //        Class beanClass = doResolveBeanClass(bd);
 //        bd.setBeanClass(beanClass);
@@ -102,16 +102,24 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
      * 通过jdk反射生成bean实例
      * spring对调用无参构造函数生成实例使用的是cglib
      */
-    private BeanWrapper instantiateBean(final String beanName, final RootBeanDefinition bd) throws IllegalAccessException, InstantiationException {
+    private BeanWrapper instantiateBean(final String beanName, final RootBeanDefinition bd)  {
 
-        Object beanInstance = bd.getBeanClass().newInstance();
+        Object beanInstance = null;
+        try {
+            beanInstance = bd.getBeanClass().newInstance();
+        } catch (InstantiationException e) {
+            e.printStackTrace();
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        }
+
         BeanWrapper bw = new BeanWrapperImpl(beanInstance);
 
         return bw;
 
     }
 
-    private void populateBean(String beanName, RootBeanDefinition bd, BeanWrapper bw) throws Exception {
+    private void populateBean(String beanName, RootBeanDefinition bd, BeanWrapper bw)  {
 
         applyPropertyValues(beanName, bd, bw);
 
@@ -193,7 +201,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
      * @param bd       要添加的属性定义
      * @param bw       beanWrapper实例
      */
-    protected void applyPropertyValues(String beanName, BeanDefinition bd, BeanWrapper bw) throws Exception {
+    protected void applyPropertyValues(String beanName, BeanDefinition bd, BeanWrapper bw)  {
 
         List<PropertyValue> pvList = bd.getPropertyValues().getPropertyValueList();
         List<PropertyValue> deepCopy = new ArrayList<>(pvList.size());
@@ -207,19 +215,30 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
             Object pvValue = pv.getValue();
 
             // ==== 属性值类型转换，使用默认转换器，ref转bean实例，string直接返回值
-            Object resolvedValue = valueResolver.resolveValueIfNecessary(pv, pvValue);
+            Object resolvedValue = null;
+            try {
+                resolvedValue = valueResolver.resolveValueIfNecessary(pv, pvValue);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
 
             deepCopy.add(new PropertyValue(pvName, resolvedValue));
 
         }
 
         // ==== 批量设置值
-        bw.setPropertyValues(new MutablePropertyValues(deepCopy));
+        try {
+            bw.setPropertyValues(new MutablePropertyValues(deepCopy));
+        } catch (NoSuchFieldException e) {
+            e.printStackTrace();
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        }
 
 
     }
 
-    public Class<?> doResolveBeanClass(RootBeanDefinition bd) throws ClassNotFoundException {
+    public Class<?> doResolveBeanClass(RootBeanDefinition bd) {
         return doResolveBeanClass((AbstractBeanDefinition) bd);
     }
 

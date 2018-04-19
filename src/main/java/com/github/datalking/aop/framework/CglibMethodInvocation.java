@@ -1,9 +1,5 @@
 package com.github.datalking.aop.framework;
 
-/**
- * @author yaoo on 4/19/18
- */
-
 import net.sf.cglib.proxy.MethodProxy;
 
 import java.lang.reflect.Method;
@@ -43,4 +39,6 @@ public class CglibMethodInvocation extends ReflectiveMethodInvocation {
             return super.invokeJoinpoint();
         }
     }
+
+
 }

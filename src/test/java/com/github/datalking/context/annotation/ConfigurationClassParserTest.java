@@ -8,6 +8,8 @@ import org.junit.After;
 
 import java.lang.annotation.Annotation;
 
+import static org.junit.Assert.assertEquals;
+
 
 /**
  * ConfigurationClassParser Tester.
@@ -33,150 +35,20 @@ public class ConfigurationClassParserTest {
 
         Annotation[] annos = ConfigurationClassParserTest.class.getAnnotations();
 
-        for (Annotation anno : annos) {
-            System.out.println(anno.annotationType().getName());
+//        for (Annotation anno : annos) {
+//
+//            System.out.println(anno.annotationType().getName());
+//
+//            for (Annotation a2 : anno.annotationType().getAnnotations()) {
+//                System.out.println("==== " + a2.annotationType().getName());
+//
+//            }
+//            System.out.println();
+//        }
 
-            for (Annotation a2 : anno.annotationType().getAnnotations()) {
-                System.out.println("==== " + a2.annotationType().getName());
-
-            }
-            System.out.println();
-        }
+        assertEquals("2", annos.length + "");
 
     }
 
-
-    /**
-     * Method: parse(Set<BeanDefinitionHolder> configCandidates)
-     */
-    @Test
-    public void testParseConfigCandidates() throws Exception {
-//TODO: Test goes here...
-    }
-
-    /**
-     * Method: parse(Class<?> clazz, String beanName)
-     */
-    @Test
-    public void testParseForClazzBeanName() throws Exception {
-//TODO: Test goes here...
-    }
-
-    /**
-     * Method: getConfigurationClasses()
-     */
-    @Test
-    public void testGetConfigurationClasses() throws Exception {
-//TODO: Test goes here...
-    }
-
-
-    /**
-     * Method: parse(AnnotationMetadata metadata, String beanName)
-     */
-    @Test
-    public void testParse() throws Exception {
-//TODO: Test goes here...
-/*
-try {
-   Method method = ConfigurationClassParser.getClass().getMethod("parse", AnnotationMetadata.class, String.class);
-   method.setAccessible(true);
-   method.invoke(<Object>, <Parameters>);
-} catch(NoSuchMethodException e) {
-} catch(IllegalAccessException e) {
-} catch(InvocationTargetException e) {
-}
-*/
-    }
-
-    /**
-     * Method: processConfigurationClass(ConfigurationClass configClass)
-     */
-    @Test
-    public void testProcessConfigurationClass() throws Exception {
-//TODO: Test goes here...
-/*
-try {
-   Method method = ConfigurationClassParser.getClass().getMethod("processConfigurationClass", ConfigurationClass.class);
-   method.setAccessible(true);
-   method.invoke(<Object>, <Parameters>);
-} catch(NoSuchMethodException e) {
-} catch(IllegalAccessException e) {
-} catch(InvocationTargetException e) {
-}
-*/
-    }
-
-    /**
-     * Method: doProcessConfigurationClass(ConfigurationClass configClass)
-     */
-    @Test
-    public void testDoProcessConfigurationClass() throws Exception {
-//TODO: Test goes here...
-/*
-try {
-   Method method = ConfigurationClassParser.getClass().getMethod("doProcessConfigurationClass", ConfigurationClass.class);
-   method.setAccessible(true);
-   method.invoke(<Object>, <Parameters>);
-} catch(NoSuchMethodException e) {
-} catch(IllegalAccessException e) {
-} catch(InvocationTargetException e) {
-}
-*/
-    }
-
-    /**
-     * Method: getImports(ConfigurationClass confClass)
-     */
-    @Test
-    public void testGetImports() throws Exception {
-//TODO: Test goes here...
-/*
-try {
-   Method method = ConfigurationClassParser.getClass().getMethod("getImports", ConfigurationClass.class);
-   method.setAccessible(true);
-   method.invoke(<Object>, <Parameters>);
-} catch(NoSuchMethodException e) {
-} catch(IllegalAccessException e) {
-} catch(InvocationTargetException e) {
-}
-*/
-    }
-
-    /**
-     * Method: retrieveBeanMethodMetadata(ConfigurationClass configClass)
-     */
-    @Test
-    public void testRetrieveBeanMethodMetadata() throws Exception {
-//TODO: Test goes here...
-/*
-try {
-   Method method = ConfigurationClassParser.getClass().getMethod("retrieveBeanMethodMetadata", ConfigurationClass.class);
-   method.setAccessible(true);
-   method.invoke(<Object>, <Parameters>);
-} catch(NoSuchMethodException e) {
-} catch(IllegalAccessException e) {
-} catch(InvocationTargetException e) {
-}
-*/
-    }
-
-    /**
-     * Method: attributesForRepeatable(AnnotationMetadata metadata, Class<?> containerClass, Class<?> annotationClass)
-     */
-    @Test
-    public void testAttributesForRepeatable() throws Exception {
-//TODO: Test goes here...
-/*
-try {
-   Method method = ConfigurationClassParser.getClass().getMethod("attributesForRepeatable", AnnotationMetadata.class, Class<?>.class, Class<?>.class);
-   method.setAccessible(true);
-   method.invoke(<Object>, <Parameters>);
-} catch(NoSuchMethodException e) {
-} catch(IllegalAccessException e) {
-} catch(InvocationTargetException e) {
-}
-*/
-    }
 
 }

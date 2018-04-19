@@ -8,7 +8,7 @@ package com.github.datalking.beans.factory;
  */
 public interface ObjectFactory<T> {
 
-    T getObject() throws Exception;
+    T getObject();
 
 
 }

@@ -75,7 +75,7 @@ public class DefaultSingletonBeanRegistry implements SingletonBeanRegistry {
     }
 
     // 用于提前注册bean，避免循环依赖
-    protected void addSingletonFactory(String beanName, ObjectFactory<?> singletonFactory) throws Exception {
+    protected void addSingletonFactory(String beanName, ObjectFactory<?> singletonFactory)  {
         Assert.notNull(singletonFactory, "Singleton factory must not be null");
         synchronized (this.singletonObjects) {
             if (!this.singletonObjects.containsKey(beanName)) {
@@ -89,7 +89,7 @@ public class DefaultSingletonBeanRegistry implements SingletonBeanRegistry {
     }
 
     @Override
-    public Object getSingleton(String beanName) throws Exception {
+    public Object getSingleton(String beanName)  {
         return getSingleton(beanName, true);
 
     }
@@ -102,7 +102,7 @@ public class DefaultSingletonBeanRegistry implements SingletonBeanRegistry {
      * @param allowEarlyReference 是否允许提前曝光
      * @return bean实例
      */
-    protected Object getSingleton(String beanName, boolean allowEarlyReference) throws Exception {
+    protected Object getSingleton(String beanName, boolean allowEarlyReference) {
 
         Object singletonObject = this.singletonObjects.get(beanName);
 
@@ -193,6 +193,11 @@ public class DefaultSingletonBeanRegistry implements SingletonBeanRegistry {
         }
     }
 
+
+    public boolean isCurrentlyInCreation(String beanName) {
+        Assert.notNull(beanName, "Bean name must not be null");
+        return isSingletonCurrentlyInCreation(beanName);
+    }
 
     public boolean isSingletonCurrentlyInCreation(String beanName) {
         return this.singletonsCurrentlyInCreation.contains(beanName);

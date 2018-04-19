@@ -23,7 +23,7 @@ public class BeanFactoryAspectJAdvisorsBuilder {
 
     private volatile List<String> aspectBeanNames;
 
-    private final Map<String, List<Advisor>> advisorsCache = new ConcurrentHashMap<String, List<Advisor>>();
+    private final Map<String, List<Advisor>> advisorsCache = new ConcurrentHashMap<>();
 
     private final Map<String, MetadataAwareAspectInstanceFactory> aspectFactoryCache = new ConcurrentHashMap<>();
 

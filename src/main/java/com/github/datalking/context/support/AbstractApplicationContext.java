@@ -23,7 +23,8 @@ public abstract class AbstractApplicationContext implements ConfigurableApplicat
     private String configLocation;
 
     private final List<BeanFactoryPostProcessor> beanFactoryPostProcessors = new ArrayList<>();
-//    private long startupDate;
+
+    //private long startupDate;
 
     public AbstractApplicationContext() {
         // 使用注解，不使用xml时，configLocation默认为空字符串
@@ -50,13 +51,19 @@ public abstract class AbstractApplicationContext implements ConfigurableApplicat
 
 
     @Override
-    public Object getBean(String name) throws Exception {
+    public Object getBean(String name) {
         return beanFactory.getBean(name);
     }
 
     public AbstractBeanFactory getBeanFactory() {
         return beanFactory;
     }
+
+    @Override
+    public Class<?> getType(String name) {
+        return getBeanFactory().getType(name);
+    }
+
 
     /**
      * 读取配置文件并注册bean
@@ -70,13 +77,12 @@ public abstract class AbstractApplicationContext implements ConfigurableApplicat
             // 读取xml配置文件
             obtainFreshBeanFactory();
 
-
             // 激活各种BeanFactoryPostProcessor，如扫描@Configuration、@Bean、@ComponentScan
             invokeBeanFactoryPostProcessors(beanFactory);
 
-            // 注册拦截bean创建的bean处理器，这里只是注册，真正的调用是在getBean时候
-            // 将各种Defnition转换成RootBeanDefinition
-            //registerBeanPostProcessors(beanFactory);
+            // 注册拦截bean创建的bean处理器，这里只是注册，真正的调用是在getBean
+            // 实例化各种内部bean，如AnnotationAwareAspectJAutoProxyCreator
+            registerBeanPostProcessors(beanFactory);
 
             // 通过调用getBean()创建非懒加载而是需要立即实例化的bean
             finishBeanFactoryInitialization(beanFactory);
@@ -102,9 +108,9 @@ public abstract class AbstractApplicationContext implements ConfigurableApplicat
 
     }
 
-//    private void registerBeanPostProcessors(ConfigurableListableBeanFactory beanFactory) {
-//        //PostProcessorRegistrationDelegate.registerBeanPostProcessors(beanFactory, this);
-//    }
+    private void registerBeanPostProcessors(ConfigurableListableBeanFactory beanFactory) {
+        PostProcessorRegistrationDelegate.registerBeanPostProcessors(beanFactory, this);
+    }
 
     private void finishBeanFactoryInitialization(ConfigurableListableBeanFactory beanFactory) throws Exception {
 

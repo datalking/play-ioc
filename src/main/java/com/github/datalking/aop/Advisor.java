@@ -3,7 +3,7 @@ package com.github.datalking.aop;
 import org.aopalliance.aop.Advice;
 
 /**
- * 持有Advice
+ * Advisor持有Advice
  * <p>
  * 用于组织target、advice、joinpoint
  *

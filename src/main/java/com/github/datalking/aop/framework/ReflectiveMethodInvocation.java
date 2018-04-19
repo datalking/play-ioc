@@ -53,7 +53,7 @@ public class ReflectiveMethodInvocation implements ProxyMethodInvocation, Clonea
     public MethodInvocation invocableClone() {
         Object[] cloneArguments = null;
         if (this.arguments != null) {
-            // Build an independent copy of the arguments array.
+
             cloneArguments = new Object[this.arguments.length];
             System.arraycopy(this.arguments, 0, cloneArguments, 0, this.arguments.length);
         }
@@ -62,11 +62,7 @@ public class ReflectiveMethodInvocation implements ProxyMethodInvocation, Clonea
 
     @Override
     public MethodInvocation invocableClone(Object... arguments) {
-//        if (this.userAttributes == null) {
-//            this.userAttributes = new HashMap<String, Object>();
-//        }
 
-        // Create the MethodInvocation clone.
         try {
             ReflectiveMethodInvocation clone = (ReflectiveMethodInvocation) clone();
             clone.arguments = arguments;
@@ -123,7 +119,6 @@ public class ReflectiveMethodInvocation implements ProxyMethodInvocation, Clonea
             }
 
         } else {
-            // It's an interceptor, so we just invoke it:
             // The pointcut will have been evaluated statically before this object was constructed.
             return ((MethodInterceptor) interceptorOrInterceptionAdvice).invoke(this);
         }
@@ -155,7 +150,7 @@ public class ReflectiveMethodInvocation implements ProxyMethodInvocation, Clonea
 
     public Map<String, Object> getUserAttributes() {
         if (this.userAttributes == null) {
-            this.userAttributes = new HashMap<String, Object>();
+            this.userAttributes = new HashMap<>();
         }
         return this.userAttributes;
     }
@@ -163,7 +158,6 @@ public class ReflectiveMethodInvocation implements ProxyMethodInvocation, Clonea
 
     @Override
     public String toString() {
-        // Don't do toString on target, it may be proxied.
         StringBuilder sb = new StringBuilder("ReflectiveMethodInvocation: ");
         sb.append(this.method).append("; ");
         if (this.target == null) {

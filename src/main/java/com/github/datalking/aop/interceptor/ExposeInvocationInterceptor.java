@@ -12,10 +12,11 @@ import java.io.Serializable;
 /**
  * copied from spring
  */
-@SuppressWarnings("serial")
 public class ExposeInvocationInterceptor implements MethodInterceptor, PriorityOrdered, Serializable {
 
     public static final ExposeInvocationInterceptor INSTANCE = new ExposeInvocationInterceptor();
+
+    private static final ThreadLocal<MethodInvocation> invocation = new NamedThreadLocal<>("Current AOP method invocation");
 
     public static final Advisor ADVISOR = new DefaultPointcutAdvisor(INSTANCE) {
         @Override
@@ -23,9 +24,6 @@ public class ExposeInvocationInterceptor implements MethodInterceptor, PriorityO
             return ExposeInvocationInterceptor.class.getName() + ".ADVISOR";
         }
     };
-
-    private static final ThreadLocal<MethodInvocation> invocation = new NamedThreadLocal<MethodInvocation>("Current AOP method invocation");
-
 
     public static MethodInvocation currentInvocation() throws IllegalStateException {
         MethodInvocation mi = invocation.get();

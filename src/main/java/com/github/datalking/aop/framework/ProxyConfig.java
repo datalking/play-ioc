@@ -3,6 +3,8 @@ package com.github.datalking.aop.framework;
 import java.io.Serializable;
 
 /**
+ * 创建代理的配置信息
+ *
  * @author yaoo on 4/18/18
  */
 public class ProxyConfig implements Serializable {
@@ -35,5 +37,6 @@ public class ProxyConfig implements Serializable {
                 "proxyTargetClass=" + proxyTargetClass +
                 '}';
     }
+
 
 }

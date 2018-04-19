@@ -2,8 +2,11 @@ package com.github.datalking.util;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.util.Collections;
 import java.util.IdentityHashMap;
+import java.util.LinkedHashSet;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * @author yaoo on 4/19/18
@@ -15,6 +18,43 @@ public abstract class ClassUtils {
     private static final Map<Class<?>, Class<?>> primitiveWrapperTypeMap = new IdentityHashMap<>(8);
 
     private static final Map<Class<?>, Class<?>> primitiveTypeToWrapperMap = new IdentityHashMap<>(8);
+
+
+    public static Set<Class<?>> getAllInterfacesForClassAsSet(Class<?> clazz) {
+        return getAllInterfacesForClassAsSet(clazz, null);
+    }
+
+    public static Set<Class<?>> getAllInterfacesForClassAsSet(Class<?> clazz,ClassLoader classLoader) {
+        Assert.notNull(clazz, "Class must not be null");
+
+        if (clazz.isInterface() && isVisible(clazz, classLoader)) {
+            return Collections.singleton(clazz);
+        }
+        Set<Class<?>> interfaces = new LinkedHashSet<>();
+        while (clazz != null) {
+            Class<?>[] ifcs = clazz.getInterfaces();
+            for (Class<?> ifc : ifcs) {
+
+                // 递归查询并加入
+                interfaces.addAll(getAllInterfacesForClassAsSet(ifc,classLoader));
+            }
+            clazz = clazz.getSuperclass();
+        }
+        return interfaces;
+    }
+
+    public static boolean isVisible(Class<?> clazz, ClassLoader classLoader) {
+        if (classLoader == null) {
+            return true;
+        }
+        try {
+            Class<?> actualClass = classLoader.loadClass(clazz.getName());
+            return (clazz == actualClass);
+        }
+        catch (ClassNotFoundException ex) {
+            return false;
+        }
+    }
 
     public static boolean isAssignable(Class<?> lhsType, Class<?> rhsType) {
         Assert.notNull(lhsType, "Left-hand side type must not be null");

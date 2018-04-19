@@ -25,10 +25,16 @@ public abstract class AbstractAdvisorAutoProxyCreator extends AbstractAutoProxyC
         this.advisorRetrievalHelper = new BeanFactoryAdvisorRetrievalHelper(beanFactory);
     }
 
+    /**
+     * 如果Bean是要被代理的对象的话，取得Bean相关的Interceptor
+     * 获取绑定到Bean上的advice列表，如果列表为空则不创建代理
+     */
+    @Override
     protected Object[] getAdvicesAndAdvisorsForBean(Class<?> beanClass, String beanName, TargetSource targetSource) {
 
         // 找到适用于bean的增强
         List<Advisor> advisors = findEligibleAdvisors(beanClass, beanName);
+
         // 找不到增强返回 DO_NOT_PROXY = null
         if (advisors.isEmpty()) {
             return DO_NOT_PROXY;
@@ -37,6 +43,7 @@ public abstract class AbstractAdvisorAutoProxyCreator extends AbstractAutoProxyC
     }
 
     protected List<Advisor> findEligibleAdvisors(Class<?> beanClass, String beanName) {
+
         // 寻找所有增强
         List<Advisor> candidateAdvisors = findCandidateAdvisors();
 

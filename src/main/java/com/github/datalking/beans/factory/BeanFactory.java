@@ -6,14 +6,14 @@ package com.github.datalking.beans.factory;
 public interface BeanFactory {
 
     //可以用别名查找
-    Object getBean(String name) throws Exception;
+    Object getBean(String name) ;
 
     Class<?> getType(String name) ;
 
 
-    boolean isPrototype(String name) ;
+//    boolean isPrototype(String name) ;
 
-    boolean isSingleton(String name) ;
+//    boolean isSingleton(String name) ;
 
     //类型可以是接口或者子类,但不能是null
 //    <T> T getBean(Class<T> requiredType) throws Exception;

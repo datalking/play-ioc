@@ -66,7 +66,6 @@ public class AnnotationConfigApplicationContextTest {
      */
     @Test
     public void testScan() throws Exception {
-//TODO: Test goes here...
     }
 
     /**
@@ -74,7 +73,6 @@ public class AnnotationConfigApplicationContextTest {
      */
     @Test
     public void testRegister() throws Exception {
-//TODO: Test goes here...
     }
 
 

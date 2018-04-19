@@ -27,6 +27,9 @@ public class DefaultAdvisorAdapterRegistry implements AdvisorAdapterRegistry, Se
         this.adapters.add(adapter);
     }
 
+    /**
+     * 将advice包装成advisor
+     */
     @Override
     public Advisor wrap(Object adviceObject) {
 

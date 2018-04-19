@@ -1,11 +1,17 @@
 package com.github.datalking.beans.factory.support;
 
+import com.github.datalking.beans.factory.FactoryBean;
 import com.github.datalking.beans.factory.ObjectFactory;
 import com.github.datalking.beans.factory.config.BeanDefinition;
+import com.github.datalking.beans.factory.config.BeanPostProcessor;
 import com.github.datalking.beans.factory.config.ConfigurableBeanFactory;
+import com.github.datalking.beans.factory.config.InstantiationAwareBeanPostProcessor;
 import com.github.datalking.exception.NoSuchBeanDefinitionException;
+import com.github.datalking.util.Assert;
 
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -16,20 +22,26 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry implements ConfigurableBeanFactory {
 
-    //存放已经创建或正在创建的bean名称，用于失败回滚或销毁清理
+    private final List<BeanPostProcessor> beanPostProcessors = new ArrayList<>();
+
+    // 存放已经创建或正在创建的bean名称，用于失败回滚或销毁清理
     private final Set<String> alreadyCreated = Collections.newSetFromMap(new ConcurrentHashMap<>(256));
-    /**
-     * 各类BeanDefinition合并属性后的RootBeanDefinition ConcurrentHashMap
-     */
+    // 各类BeanDefinition合并属性后的RootBeanDefinition ConcurrentHashMap
     private final Map<String, RootBeanDefinition> mergedBeanDefinitions = new ConcurrentHashMap<>(256);
 
-//    private boolean cacheBeanMetadata = true;
-//    private final List<BeanPostProcessor> beanPostProcessors = new ArrayList<BeanPostProcessor>();
+    private boolean hasInstantiationAwareBeanPostProcessors;
 
-    protected abstract Object createBean(String beanName, RootBeanDefinition bd, Object[] args) throws Exception;
+    //    private boolean hasDestructionAwareBeanPostProcessors;
+
+    //    private boolean cacheBeanMetadata = true;
+
+    // ======== abstract methods
+
+    protected abstract Object createBean(String beanName, RootBeanDefinition bd, Object[] args);
 
     protected abstract BeanDefinition getBeanDefinition(String beanName);
 
+    protected abstract boolean containsBeanDefinition(String beanName);
 
     @Override
     public Class<?> getType(String name) {
@@ -49,13 +61,15 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
     }
 
     @Override
-    public Object getBean(String name) throws Exception {
+    public Object getBean(String name) {
 
         return doGetBean(name, null, null, false);
     }
 
-    protected <T> T doGetBean(final String name, final Class<T> requiredType, final Object[] args,
-                              boolean typeCheckOnly) throws Exception {
+    protected <T> T doGetBean(final String name,
+                              final Class<T> requiredType,
+                              final Object[] args,
+                              boolean typeCheckOnly) {
 
         //将别名解析为bean唯一名称
         //final String name = transformedBeanName(name);
@@ -125,11 +139,70 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
 
     }
 
+    //@Override
+    public boolean containsBean(String name) {
+        //String beanName = transformedBeanName(name);
+        String beanName = name;
+        if (containsSingleton(beanName) || containsBeanDefinition(beanName)) {
+            return true;
+        }
+        return false;
+    }
+
+    @Override
+    public void addBeanPostProcessor(BeanPostProcessor beanPostProcessor) {
+        Assert.notNull(beanPostProcessor, "BeanPostProcessor must not be null");
+        this.beanPostProcessors.remove(beanPostProcessor);
+        this.beanPostProcessors.add(beanPostProcessor);
+        if (beanPostProcessor instanceof InstantiationAwareBeanPostProcessor) {
+            this.hasInstantiationAwareBeanPostProcessors = true;
+        }
+//        if (beanPostProcessor instanceof DestructionAwareBeanPostProcessor) {
+//            this.hasDestructionAwareBeanPostProcessors = true;
+//        }
+    }
+
+    @Override
+    public int getBeanPostProcessorCount() {
+        return this.beanPostProcessors.size();
+    }
+
+    public List<BeanPostProcessor> getBeanPostProcessors() {
+        return this.beanPostProcessors;
+    }
+
+    protected boolean hasInstantiationAwareBeanPostProcessors() {
+        return this.hasInstantiationAwareBeanPostProcessors;
+    }
+
+
+    // todo 现在的判断规则过于简单
+    public boolean isFactoryBean(String name) {
+
+        //String beanName = transformedBeanName(name);
+        String beanName = name;
+        Object beanInstance = getSingleton(beanName, false);
+        if (beanInstance != null) {
+            return (beanInstance instanceof FactoryBean);
+        } else if (containsSingleton(beanName)) {
+            return false;
+        }
+
+        return false;
+
+    }
+
+//    protected boolean isFactoryBean(String beanName, RootBeanDefinition mbd) {
+//        Class<?> beanType = predictBeanType(beanName, mbd, FactoryBean.class);
+//        // class1.isAssignableFrom(class2) 判断class1是否是class2的超类或父接口
+//        return (beanType != null && FactoryBean.class.isAssignableFrom(beanType));
+//    }
 
 //    public void destroyBean(String beanName, Object beanInstance) {
-//    public void addBeanPostProcessor(BeanPostProcessor beanPostProcessor) {
-//    public List<BeanPostProcessor> getBeanPostProcessors() {
 //    protected void initBeanWrapper(BeanWrapper bw) {
+
+//    public boolean isSingleton(String name) throws NoSuchBeanDefinitionException {
+//    public boolean isPrototype(String name) throws NoSuchBeanDefinitionException {
 
 
 }

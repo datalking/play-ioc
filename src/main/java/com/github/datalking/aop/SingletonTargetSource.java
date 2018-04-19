@@ -1,6 +1,5 @@
 package com.github.datalking.aop;
 
-
 import com.github.datalking.util.Assert;
 
 import java.io.Serializable;

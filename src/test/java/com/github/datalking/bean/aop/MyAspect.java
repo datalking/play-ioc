@@ -13,7 +13,7 @@ public class MyAspect {
     @Before("execution(* bean..*.*(..))")
     public void advice() {
 
-        System.out.println("====print this before calling method in package bean..*.*");
+        System.out.println("====print before method called in package bean..*.*");
     }
 
 }

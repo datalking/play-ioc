@@ -1,11 +1,9 @@
 package com.github.datalking.aop.support;
 
 import com.github.datalking.aop.ClassFilter;
-import com.github.datalking.aop.MethodMatcher;
 import com.github.datalking.util.Assert;
 
 import java.io.Serializable;
-import java.lang.reflect.Method;
 import java.util.Arrays;
 
 /**
@@ -25,7 +23,6 @@ public abstract class ClassFilters {
         Assert.notNull(cf2, "Second ClassFilter must not be null");
         return new IntersectionClassFilter(new ClassFilter[]{cf1, cf2});
     }
-
 
 
     private static class UnionClassFilter implements ClassFilter, Serializable {

@@ -1,13 +1,20 @@
 package com.github.datalking.aop.framework;
 
 import com.github.datalking.aop.Advisor;
+import com.github.datalking.aop.SingletonTargetSource;
 import com.github.datalking.aop.TargetSource;
+import com.github.datalking.aop.framework.adapter.AdvisorAdapterRegistry;
+import com.github.datalking.aop.framework.adapter.GlobalAdvisorAdapterRegistry;
 import com.github.datalking.beans.PropertyValues;
 import com.github.datalking.beans.factory.BeanFactory;
 import com.github.datalking.beans.factory.BeanFactoryAware;
+import com.github.datalking.beans.factory.config.ConfigurableBeanFactory;
 import com.github.datalking.beans.factory.config.SmartInstantiationAwareBeanPostProcessor;
 
 import java.beans.PropertyDescriptor;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * @author yaoo on 4/18/18
@@ -18,13 +25,13 @@ public abstract class AbstractAutoProxyCreator extends ProxyConfig
     // 不使用代理
     protected static final Object[] DO_NOT_PROXY = null;
 
-    // 拦截器 默认为空
-    private String[] interceptorNames = new String[0];
 
     private BeanFactory beanFactory;
 
-    protected int order = -99999999;
-    private boolean proxyTargetClass = false;
+    private AdvisorAdapterRegistry advisorAdapterRegistry = GlobalAdvisorAdapterRegistry.getInstance();
+
+    // 拦截器 默认为空
+    private String[] interceptorNames = new String[0];
 
 
     @Override
@@ -36,6 +43,13 @@ public abstract class AbstractAutoProxyCreator extends ProxyConfig
         return this.beanFactory;
     }
 
+    public void setInterceptorNames(String... interceptorNames) {
+        this.interceptorNames = interceptorNames;
+    }
+
+    public void setAdvisorAdapterRegistry(AdvisorAdapterRegistry advisorAdapterRegistry) {
+        this.advisorAdapterRegistry = advisorAdapterRegistry;
+    }
 
     @Override
     public Object postProcessBeforeInstantiation(Class<?> beanClass, String beanName) {
@@ -150,6 +164,47 @@ public abstract class AbstractAutoProxyCreator extends ProxyConfig
 //        }
 
         return proxyFactory.getProxy();
+    }
+
+    /**
+     * 获取bean的advisor
+     */
+    private Advisor[] buildAdvisors(String beanName, Object[] specificInterceptors) {
+
+        Advisor[] commonInterceptors = resolveInterceptorNames();
+
+        List<Object> allInterceptors = new ArrayList<>();
+        if (specificInterceptors != null) {
+            allInterceptors.addAll(Arrays.asList(specificInterceptors));
+            if (commonInterceptors.length > 0) {
+                // 默认添加公共拦截器到列表头部
+                allInterceptors.addAll(0, Arrays.asList(commonInterceptors));
+            }
+        }
+
+        Advisor[] advisors = new Advisor[allInterceptors.size()];
+        for (int i = 0; i < allInterceptors.size(); i++) {
+            advisors[i] = this.advisorAdapterRegistry.wrap(allInterceptors.get(i));
+        }
+        return advisors;
+    }
+
+    /**
+     * 解析拦截器名到advisor
+     */
+    private Advisor[] resolveInterceptorNames() {
+        ConfigurableBeanFactory cbf = (this.beanFactory instanceof ConfigurableBeanFactory ?
+                (ConfigurableBeanFactory) this.beanFactory : null);
+        List<Advisor> advisors = new ArrayList<>();
+        for (String beanName : this.interceptorNames) {
+            if (cbf == null || !cbf.isCurrentlyInCreation(beanName)) {
+
+                Object next = this.beanFactory.getBean(beanName);
+
+                advisors.add(this.advisorAdapterRegistry.wrap(next));
+            }
+        }
+        return advisors.toArray(new Advisor[advisors.size()]);
     }
 
 

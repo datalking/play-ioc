@@ -10,7 +10,12 @@ import com.github.datalking.beans.factory.BeanFactory;
  */
 public interface ConfigurableBeanFactory extends BeanFactory {
 
-//void addBeanPostProcessor(BeanPostProcessor beanPostProcessor);
+    boolean isCurrentlyInCreation(String beanName);
+
+    void addBeanPostProcessor(BeanPostProcessor beanPostProcessor);
+
+    int getBeanPostProcessorCount();
+
 //void destroyBean(String beanName, Object beanInstance);
 //void registerAlias(String beanName, String alias) ;
 

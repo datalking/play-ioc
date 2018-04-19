@@ -8,7 +8,7 @@ import com.github.datalking.util.Assert;
 import java.io.Serializable;
 
 /**
- * 可组合的Pointcut
+ * 组合Pointcut
  * <p>
  * Pointcut pc = new ComposablePointcut().union(classFilter).intersection(methodMatcher).intersection(pointcut);
  *

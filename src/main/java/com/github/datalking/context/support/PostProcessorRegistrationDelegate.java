@@ -1,9 +1,12 @@
 package com.github.datalking.context.support;
 
 import com.github.datalking.beans.factory.config.BeanFactoryPostProcessor;
+import com.github.datalking.beans.factory.config.BeanPostProcessor;
 import com.github.datalking.beans.factory.config.ConfigurableListableBeanFactory;
 import com.github.datalking.beans.factory.support.BeanDefinitionRegistry;
 import com.github.datalking.beans.factory.support.BeanDefinitionRegistryPostProcessor;
+import com.github.datalking.common.Ordered;
+import com.github.datalking.common.PriorityOrdered;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -75,6 +78,59 @@ public class PostProcessorRegistrationDelegate {
             postProcessor.postProcessBeanFactory(beanFactory);
         }
 
+    }
+
+    public static void registerBeanPostProcessors(ConfigurableListableBeanFactory beanFactory, AbstractApplicationContext applicationContext) {
+
+        // 获取BeanPostProcessor类型的bean名
+        String[] postProcessorNames = beanFactory.getBeanNamesForType(BeanPostProcessor.class);
+
+        List<BeanPostProcessor> priorityOrderedPostProcessors = new ArrayList<>();
+        List<BeanPostProcessor> internalPostProcessors = new ArrayList<>();
+        List<String> orderedPostProcessorNames = new ArrayList<>();
+        List<String> nonOrderedPostProcessorNames = new ArrayList<>();
+
+
+        for (String ppName : postProcessorNames) {
+
+            if (beanFactory.isTypeMatch(ppName, PriorityOrdered.class)) {
+                BeanPostProcessor pp = beanFactory.getBean(ppName, BeanPostProcessor.class);
+                priorityOrderedPostProcessors.add(pp);
+                if (pp instanceof MergedBeanDefinitionPostProcessor) {
+                    internalPostProcessors.add(pp);
+                }
+
+            } else if (beanFactory.isTypeMatch(ppName, Ordered.class)) {
+                orderedPostProcessorNames.add(ppName);
+            } else {
+                nonOrderedPostProcessorNames.add(ppName);
+            }
+        }
+        registerBeanPostProcessors(beanFactory, priorityOrderedPostProcessors);
+
+
+        // 下面实例化 AutoProxyCreator
+        List<BeanPostProcessor> orderedPostProcessors = new ArrayList<BeanPostProcessor>();
+        for (String ppName : orderedPostProcessorNames) {
+            BeanPostProcessor pp = beanFactory.getBean(ppName, BeanPostProcessor.class);
+            orderedPostProcessors.add(pp);
+            if (pp instanceof MergedBeanDefinitionPostProcessor) {
+                internalPostProcessors.add(pp);
+            }
+        }
+
+        registerBeanPostProcessors(beanFactory, nonOrderedPostProcessors);
+
+
+
+    }
+
+    private static void registerBeanPostProcessors(
+            ConfigurableListableBeanFactory beanFactory, List<BeanPostProcessor> postProcessors) {
+
+        for (BeanPostProcessor postProcessor : postProcessors) {
+            beanFactory.addBeanPostProcessor(postProcessor);
+        }
     }
 
 

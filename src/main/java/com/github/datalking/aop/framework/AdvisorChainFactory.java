@@ -8,7 +8,6 @@ import java.util.List;
  */
 public interface AdvisorChainFactory {
 
-
     List<Object> getInterceptorsAndDynamicInterceptionAdvice(Advised config, Method method, Class<?> targetClass);
 
 }

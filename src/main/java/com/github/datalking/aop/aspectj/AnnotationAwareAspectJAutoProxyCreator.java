@@ -6,14 +6,12 @@ import com.github.datalking.util.Assert;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.regex.Pattern;
 
 /**
  * @author yaoo on 4/17/18
  */
 public class AnnotationAwareAspectJAutoProxyCreator extends AspectJAwareAdvisorAutoProxyCreator {
 
-    //    private List<Pattern> includePatterns;
     private AspectJAdvisorFactory aspectJAdvisorFactory;
     private BeanFactoryAspectJAdvisorsBuilder aspectJAdvisorsBuilder;
 
@@ -43,8 +41,9 @@ public class AnnotationAwareAspectJAutoProxyCreator extends AspectJAwareAdvisorA
         //List<Advisor> advisors = super.findCandidateAdvisors();
         List<Advisor> advisors = new ArrayList<>();
 
-        // 获取有@Aspect的Bean上的注解增强
+        // 获取有注解@Aspect的advisor
         advisors.addAll(this.aspectJAdvisorsBuilder.buildAspectJAdvisors());
+
         return advisors;
     }
 

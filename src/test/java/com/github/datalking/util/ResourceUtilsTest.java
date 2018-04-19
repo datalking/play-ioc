@@ -8,6 +8,9 @@ import org.junit.After;
 import java.util.HashSet;
 import java.util.Set;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+
 /**
  * ResourceUtils Tester.
  *
@@ -33,26 +36,12 @@ public class ResourceUtilsTest {
 
         Set<Class> classSet = ResourceUtils.getAllClassFromPackage("com.github.datalking.context", true);
 
-        for (Class c : classSet) {
-            System.out.println(c.getName());
-        }
+//        for (Class c : classSet) {
+//            System.out.println(c.getName());
+//        }
 
-    }
+        assertNotNull(classSet);
 
-    /**
-     * Method: getClassInPackageByFile(String packageName, String filePath, final boolean recursive, Set<Class> clazzs)
-     */
-    @Test
-    public void testGetClassInPackageByFile() throws Exception {
-//TODO: Test goes here...
-    }
-
-    /**
-     * Method: getClasssFromJarFile(String jarPaht, String filePaht)
-     */
-    @Test
-    public void testGetClasssFromJarFile() throws Exception {
-//TODO: Test goes here...
     }
 
 

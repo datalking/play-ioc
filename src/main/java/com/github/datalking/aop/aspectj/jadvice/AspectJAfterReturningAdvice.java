@@ -12,7 +12,6 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 
 /**
-
  */
 @SuppressWarnings("serial")
 public class AspectJAfterReturningAdvice extends AbstractAspectJAdvice

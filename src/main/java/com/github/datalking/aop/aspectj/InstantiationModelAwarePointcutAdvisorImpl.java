@@ -64,7 +64,7 @@ public class InstantiationModelAwarePointcutAdvisorImpl
 
         if (aspectInstanceFactory.getAspectMetadata().isLazilyInstantiated()) {
 
-            // Static part of the pointcut is a lazy type.
+            //  pointcut的static 部分懒加载
             Pointcut preInstantiationPointcut = Pointcuts.union(
                     aspectInstanceFactory.getAspectMetadata().getPerClausePointcut(),
                     this.declaredPointcut);
@@ -174,7 +174,7 @@ public class InstantiationModelAwarePointcutAdvisorImpl
 
     private void determineAdviceType() {
 
-        AbstractAspectJAdvisorFactory.AspectJAnnotation<?> aspectJAnnotation =
+        AspectJAnnotation<?> aspectJAnnotation =
                 AbstractAspectJAdvisorFactory.findAspectJAnnotationOnMethod(this.aspectJAdviceMethod);
 
         if (aspectJAnnotation == null) {

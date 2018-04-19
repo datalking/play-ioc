@@ -6,7 +6,7 @@ import java.util.Collection;
 import java.util.Map;
 
 /**
- * todo replace it
+ * copied from spring
  */
 public abstract class ObjectUtils {
 

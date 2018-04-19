@@ -47,7 +47,7 @@ public class AnnoBeanMethodTest {
     public void testBeanMethodDefaultConstrutor() throws Exception {
         ApplicationContext ctx = new AnnotationConfigApplicationContext(AnnoBeanMethodTest.class);
         HelloWorld helloWorld = (HelloWorld) ctx.getBean("helloWorld");
-        System.out.println(helloWorld.getMessage());
+        //System.out.println(helloWorld.getMessage());
         assertEquals("default message is ....", helloWorld.getMessage());
 
     }
