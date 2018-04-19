@@ -2,6 +2,8 @@ package com.github.datalking.aop.support;
 
 import com.github.datalking.aop.framework.Advised;
 import com.github.datalking.aop.framework.AdvisedSupport;
+import com.github.datalking.common.BridgeMethodResolver;
+import com.github.datalking.util.ClassUtils;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -64,11 +66,12 @@ public interface AopUtils {
         return proxiedInterfaces;
     }
 
-//     static Method getMostSpecificMethod(Method method, Class<?> targetClass) {
-//        Method resolvedMethod = ClassUtils.getMostSpecificMethod(method, targetClass);
-//        // If we are dealing with method with generic parameters, find the original method.
-//        return BridgeMethodResolver.findBridgedMethod(resolvedMethod);
-//    }
+     static Method getMostSpecificMethod(Method method, Class<?> targetClass) {
+        Method resolvedMethod = ClassUtils.getMostSpecificMethod(method, targetClass);
+        // If we are dealing with method with generic parameters, find the original method.
+        //return BridgeMethodResolver.findBridgedMethod(resolvedMethod);
+        return resolvedMethod;
+    }
 
 
 }

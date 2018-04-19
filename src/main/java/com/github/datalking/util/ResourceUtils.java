@@ -16,7 +16,7 @@ import java.util.jar.JarFile;
  *
  * @author yaoo on 4/9/18
  */
-public class ResourceUtils {
+public abstract class ResourceUtils {
 
     /**
      * 获取指定包下的所有class对象
@@ -99,7 +99,7 @@ public class ResourceUtils {
     }
 
 
-    public Set<Class> getClasssFromJarFile(String jarPaht, String filePaht) {
+    public static Set<Class> getClasssFromJarFile(String jarPaht, String filePaht) {
         Set<Class> clazzs = new HashSet<Class>();
 
         JarFile jarFile = null;

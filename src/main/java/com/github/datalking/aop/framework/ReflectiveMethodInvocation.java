@@ -1,19 +1,22 @@
 package com.github.datalking.aop.framework;
 
+import com.github.datalking.aop.ProxyMethodInvocation;
 import com.github.datalking.aop.support.AopUtils;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 
 import java.lang.reflect.AccessibleObject;
 import java.lang.reflect.Method;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * AOP Alliance MethodInvocation 基于反射调用方法
  *
  * @author yaoo on 4/18/18
  */
-public class ReflectiveMethodInvocation implements MethodInvocation {
+public class ReflectiveMethodInvocation implements ProxyMethodInvocation, Cloneable {
 
     protected final Object proxy;
 
@@ -29,6 +32,8 @@ public class ReflectiveMethodInvocation implements MethodInvocation {
 
     private int currentInterceptorIndex = -1;
 
+    private Map<String, Object> userAttributes;
+
     public ReflectiveMethodInvocation(Object proxy, Object target, Method method, Object[] arguments, Class<?> targetClass
             , List<Object> interceptorsAndDynamicMethodMatchers) {
         this.proxy = proxy;
@@ -39,8 +44,36 @@ public class ReflectiveMethodInvocation implements MethodInvocation {
         this.interceptorsAndDynamicMethodMatchers = interceptorsAndDynamicMethodMatchers;
     }
 
+    @Override
     public final Object getProxy() {
         return this.proxy;
+    }
+
+    @Override
+    public MethodInvocation invocableClone() {
+        Object[] cloneArguments = null;
+        if (this.arguments != null) {
+            // Build an independent copy of the arguments array.
+            cloneArguments = new Object[this.arguments.length];
+            System.arraycopy(this.arguments, 0, cloneArguments, 0, this.arguments.length);
+        }
+        return invocableClone(cloneArguments);
+    }
+
+    @Override
+    public MethodInvocation invocableClone(Object... arguments) {
+//        if (this.userAttributes == null) {
+//            this.userAttributes = new HashMap<String, Object>();
+//        }
+
+        // Create the MethodInvocation clone.
+        try {
+            ReflectiveMethodInvocation clone = (ReflectiveMethodInvocation) clone();
+            clone.arguments = arguments;
+            return clone;
+        } catch (CloneNotSupportedException ex) {
+            throw new IllegalStateException("Should be able to clone object of type [" + getClass() + "]: " + ex);
+        }
     }
 
     @Override
@@ -66,6 +99,7 @@ public class ReflectiveMethodInvocation implements MethodInvocation {
     public void setArguments(Object... arguments) {
         this.arguments = arguments;
     }
+
 
     @Override
     public Object proceed() throws Throwable {
@@ -97,6 +131,47 @@ public class ReflectiveMethodInvocation implements MethodInvocation {
 
     protected Object invokeJoinpoint() throws Throwable {
         return AopUtils.invokeJoinpointUsingReflection(this.target, this.method, this.arguments);
+    }
+
+
+    @Override
+    public Object getUserAttribute(String key) {
+        return (this.userAttributes != null ? this.userAttributes.get(key) : null);
+    }
+
+    @Override
+    public void setUserAttribute(String key, Object value) {
+        if (value != null) {
+            if (this.userAttributes == null) {
+                this.userAttributes = new HashMap<>();
+            }
+            this.userAttributes.put(key, value);
+        } else {
+            if (this.userAttributes != null) {
+                this.userAttributes.remove(key);
+            }
+        }
+    }
+
+    public Map<String, Object> getUserAttributes() {
+        if (this.userAttributes == null) {
+            this.userAttributes = new HashMap<String, Object>();
+        }
+        return this.userAttributes;
+    }
+
+
+    @Override
+    public String toString() {
+        // Don't do toString on target, it may be proxied.
+        StringBuilder sb = new StringBuilder("ReflectiveMethodInvocation: ");
+        sb.append(this.method).append("; ");
+        if (this.target == null) {
+            sb.append("target is null");
+        } else {
+            sb.append("target is of class [").append(this.target.getClass().getName()).append(']');
+        }
+        return sb.toString();
     }
 
 

@@ -1,9 +1,11 @@
 package com.github.datalking.aop.aspectj;
 
 import com.github.datalking.aop.Pointcut;
+import com.github.datalking.aop.support.ComposablePointcut;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.reflect.AjType;
 import org.aspectj.lang.reflect.AjTypeSystem;
+import org.aspectj.lang.reflect.PerClauseKind;
 
 import java.io.Serializable;
 
@@ -17,7 +19,7 @@ public class AspectMetadata implements Serializable {
     private final String aspectName;
     private final Class<?> aspectClass;
     private transient AjType<?> ajType;
-    private final Pointcut perClausePointcut;
+    private Pointcut perClausePointcut;
 
 
     public AspectMetadata(Class<?> aspectClass, String aspectName) {
@@ -73,6 +75,38 @@ public class AspectMetadata implements Serializable {
         str = str.substring(str.indexOf("(") + 1);
         str = str.substring(0, str.length() - 1);
         return str;
+    }
+
+
+    public String getAspectName() {
+        return aspectName;
+    }
+
+    public Class<?> getAspectClass() {
+        return aspectClass;
+    }
+
+    public AjType<?> getAjType() {
+        return ajType;
+    }
+
+    public Pointcut getPerClausePointcut() {
+        return perClausePointcut;
+    }
+
+    public boolean isPerThisOrPerTarget() {
+        PerClauseKind kind = getAjType().getPerClause().getKind();
+        return (kind == PerClauseKind.PERTARGET || kind == PerClauseKind.PERTHIS);
+    }
+
+    public boolean isPerTypeWithin() {
+        PerClauseKind kind = getAjType().getPerClause().getKind();
+        return (kind == PerClauseKind.PERTYPEWITHIN);
+    }
+
+
+    public boolean isLazilyInstantiated() {
+        return (isPerThisOrPerTarget() || isPerTypeWithin());
     }
 
 }

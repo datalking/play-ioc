@@ -75,11 +75,11 @@ public class BeanFactoryAspectJAdvisorsBuilder {
                                     //==== 解析标记AspectJ注解的增强方法
                                     List<Advisor> classAdvisors = this.advisorFactory.getAdvisors(factory);
 
-                                    if (this.beanFactory.isSingleton(beanName)) {
-                                        this.advisorsCache.put(beanName, classAdvisors);
-                                    } else {
-                                        this.aspectFactoryCache.put(beanName, factory);
-                                    }
+                                    this.advisorsCache.put(beanName, classAdvisors);
+//                                    if (this.beanFactory.isSingleton(beanName)) {
+//                                    } else {
+//                                        this.aspectFactoryCache.put(beanName, factory);
+//                                    }
 
                                     advisors.addAll(classAdvisors);
 

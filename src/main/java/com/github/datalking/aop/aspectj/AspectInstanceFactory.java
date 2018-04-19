@@ -10,6 +10,6 @@ public interface AspectInstanceFactory extends Ordered {
 
     Object getAspectInstance();
 
-    ClassLoader getAspectClassLoader();
+    //ClassLoader getAspectClassLoader();
 
 }

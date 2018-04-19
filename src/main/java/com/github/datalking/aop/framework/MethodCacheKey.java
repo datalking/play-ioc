@@ -7,7 +7,7 @@ import java.lang.reflect.Method;
  *
  * @author yaoo on 4/19/18
  */
-public final class MethodCacheKey implements Comparable<MethodCacheKey> {
+public class MethodCacheKey implements Comparable<MethodCacheKey> {
 
     private final Method method;
 

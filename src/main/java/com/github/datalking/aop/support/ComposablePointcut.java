@@ -72,5 +72,58 @@ public class ComposablePointcut implements Pointcut, Serializable {
         return this;
     }
 
+    public ComposablePointcut union(Pointcut other) {
+        this.methodMatcher = MethodMatchers.union(this.methodMatcher, this.classFilter, other.getMethodMatcher(), other.getClassFilter());
+        this.classFilter = ClassFilters.union(this.classFilter, other.getClassFilter());
+        return this;
+    }
+
+    public ComposablePointcut intersection(Pointcut other) {
+        this.classFilter = ClassFilters.intersection(this.classFilter, other.getClassFilter());
+        this.methodMatcher = MethodMatchers.intersection(this.methodMatcher, other.getMethodMatcher());
+        return this;
+    }
+
+    @Override
+    public ClassFilter getClassFilter() {
+        return this.classFilter;
+    }
+
+    @Override
+    public MethodMatcher getMethodMatcher() {
+        return this.methodMatcher;
+    }
+
+    @Override
+    public boolean equals(Object other) {
+        if (this == other) {
+            return true;
+        }
+        if (!(other instanceof ComposablePointcut)) {
+            return false;
+        }
+        ComposablePointcut that = (ComposablePointcut) other;
+        return that.classFilter.equals(this.classFilter) &&
+                that.methodMatcher.equals(this.methodMatcher);
+    }
+
+    @Override
+    public int hashCode() {
+        int code = 17;
+        if (this.classFilter != null) {
+            code = 37 * code + this.classFilter.hashCode();
+        }
+        if (this.methodMatcher != null) {
+            code = 37 * code + this.methodMatcher.hashCode();
+        }
+        return code;
+    }
+
+
+    @Override
+    public String toString() {
+        return "ComposablePointcut: " + this.classFilter + ", " + this.methodMatcher;
+    }
+
 
 }

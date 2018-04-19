@@ -15,7 +15,7 @@ import java.util.List;
  *
  * @author yaoo on 4/18/18
  */
-public final class JdkDynamicAopProxy implements AopProxy, InvocationHandler, Serializable {
+public class JdkDynamicAopProxy implements AopProxy, InvocationHandler, Serializable {
 
     // 代理配置信息
     private final AdvisedSupport advisedSupport;

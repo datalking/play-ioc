@@ -72,40 +72,7 @@ public class DynamicAdvisedInterceptor implements MethodInterceptor, Serializabl
         return this.advised.hashCode();
     }
 
-    /**
-     * AOP Alliance MethodInvocation的实现类
-     */
-    private static class CglibMethodInvocation extends ReflectiveMethodInvocation {
 
-        private final MethodProxy methodProxy;
-
-        private final boolean publicMethod;
-
-        CglibMethodInvocation(Object proxy,
-                              Object target,
-                              Method method,
-                              Object[] arguments,
-                              Class<?> targetClass,
-                              List<Object> interceptorsAndDynamicMethodMatchers,
-                              MethodProxy methodProxy) {
-
-            super(proxy, target, method, arguments, targetClass, interceptorsAndDynamicMethodMatchers);
-            this.methodProxy = methodProxy;
-            this.publicMethod = Modifier.isPublic(method.getModifiers());
-        }
-
-        /**
-         * public方法使用cglib调用
-         */
-        @Override
-        protected Object invokeJoinpoint() throws Throwable {
-            if (this.publicMethod) {
-                return this.methodProxy.invoke(this.target, this.arguments);
-            } else {
-                return super.invokeJoinpoint();
-            }
-        }
-    }
 
 
 }
