@@ -20,6 +20,7 @@ public abstract class ClassUtils {
     private static final Map<Class<?>, Class<?>> primitiveTypeToWrapperMap = new IdentityHashMap<>(8);
 
 
+
     public static Set<Class<?>> getAllInterfacesForClassAsSet(Class<?> clazz) {
         return getAllInterfacesForClassAsSet(clazz, null);
     }

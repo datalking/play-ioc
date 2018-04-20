@@ -64,6 +64,10 @@ public abstract class AbstractApplicationContext implements ConfigurableApplicat
         return getBeanFactory().getType(name);
     }
 
+    @Override
+    public boolean isTypeMatch(String name, Class<?> targetType) {
+        return getBeanFactory().isTypeMatch(name, targetType);
+    }
 
     /**
      * 读取配置文件并注册bean

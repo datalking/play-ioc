@@ -64,6 +64,8 @@ xmlBeanDefinitionReader.loadBeanDefinitions("beans-primitive.xml");
 BeanAllStr beanAllStr = (BeanAllStr) beanFactory.getBean("beanAllStr");
 System.out.println(beanAllStr);
 ```
+## bug
+- AbstractBeanFactory.isTypeMatch()空指针异常
 
 ## todo
 

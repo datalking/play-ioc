@@ -5,11 +5,14 @@ package com.github.datalking.beans.factory;
  */
 public interface BeanFactory {
 
+    String FACTORY_BEAN_PREFIX = "&";
+
     //可以用别名查找
-    Object getBean(String name) ;
+    Object getBean(String name);
 
-    Class<?> getType(String name) ;
+    Class<?> getType(String name);
 
+    boolean isTypeMatch(String name, Class<?> typeToMatch);
 
 //    boolean isPrototype(String name) ;
 
@@ -23,9 +26,6 @@ public interface BeanFactory {
 //    boolean containsBean(String name);
 
 //    String[] getAliases(String name);
-
-
-
 
 
 }

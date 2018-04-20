@@ -1,13 +1,17 @@
 package com.github.datalking.beans.factory.support;
 
+import com.github.datalking.beans.factory.BeanFactory;
 import com.github.datalking.beans.factory.FactoryBean;
 import com.github.datalking.beans.factory.ObjectFactory;
 import com.github.datalking.beans.factory.config.BeanDefinition;
+import com.github.datalking.beans.factory.config.BeanDefinitionHolder;
 import com.github.datalking.beans.factory.config.BeanPostProcessor;
 import com.github.datalking.beans.factory.config.ConfigurableBeanFactory;
 import com.github.datalking.beans.factory.config.InstantiationAwareBeanPostProcessor;
 import com.github.datalking.exception.NoSuchBeanDefinitionException;
 import com.github.datalking.util.Assert;
+import com.github.datalking.util.ClassUtils;
+import com.github.datalking.util.ObjectUtils;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -45,18 +49,21 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
 
     @Override
     public Class<?> getType(String name) {
+
         // String beanName = transformedBeanName(name);
+        String beanName = name;
 
-        Object beanInstance = null;
-        try {
-            beanInstance = getSingleton(name, false);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
+        Object beanInstance = getSingleton(beanName, false);
         if (beanInstance != null) {
-            return beanInstance.getClass();
+            if (beanInstance instanceof FactoryBean && !isFactoryDereference(name)) {
+                return getTypeForFactoryBean((FactoryBean<?>) beanInstance);
+            } else {
+                return beanInstance.getClass();
+            }
+        } else if (containsSingleton(beanName) && !containsBeanDefinition(beanName)) {
+            return null;
         }
+
         return null;
     }
 
@@ -175,6 +182,130 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
         return this.hasInstantiationAwareBeanPostProcessors;
     }
 
+    @Override
+    public boolean isTypeMatch(String name, Class<?> targetType) {
+        //String beanName = transformedBeanName(name);
+        String beanName = name;
+        Class<?> typeToMatch = (targetType != null ? targetType : Object.class);
+
+        // Check manually registered singletons.
+        Object beanInstance = getSingleton(beanName, false);
+        if (beanInstance != null) {
+
+            if (beanInstance instanceof FactoryBean) {
+                if (!isFactoryDereference(name)) {
+                    Class<?> type = getTypeForFactoryBean((FactoryBean<?>) beanInstance);
+                    return (type != null && ClassUtils.isAssignable(typeToMatch, type));
+                } else {
+                    return ClassUtils.isAssignableValue(typeToMatch, beanInstance);
+                }
+            } else {
+                return !isFactoryDereference(name) && ClassUtils.isAssignableValue(typeToMatch, beanInstance);
+            }
+
+        } else if (containsSingleton(beanName) && !containsBeanDefinition(beanName)) {
+            // 注册 null实例
+            return false;
+
+        } else {
+
+            RootBeanDefinition mbd = getMergedLocalBeanDefinition(beanName);
+
+            Class<?>[] typesToMatch = (FactoryBean.class.equals(typeToMatch) ?
+                    new Class<?>[]{typeToMatch} : new Class<?>[]{FactoryBean.class, typeToMatch});
+
+            BeanDefinitionHolder dbd = mbd.getDecoratedDefinition();
+
+            if (mbd != null && !isFactoryDereference(name)) {
+                RootBeanDefinition tbd = getMergedBeanDefinition(dbd.getBeanName(), dbd.getBeanDefinition(), mbd);
+                Class<?> targetClass = predictBeanType(dbd.getBeanName(), tbd, typesToMatch);
+                if (targetClass != null && !FactoryBean.class.isAssignableFrom(targetClass)) {
+                    return typeToMatch.isAssignableFrom(targetClass);
+                }
+            }
+
+            Class<?> beanType = predictBeanType(beanName, mbd, typesToMatch);
+
+            if (beanType == null) {
+                return false;
+            }
+
+            if (FactoryBean.class.isAssignableFrom(beanType)) {
+                if (!isFactoryDereference(name)) {
+                    // If it's a FactoryBean, we want to look at what it creates, not the factory class.
+                    beanType = getTypeForFactoryBean(beanName, mbd);
+                    if (beanType == null) {
+                        return false;
+                    }
+                }
+            } else if (isFactoryDereference(name)) {
+
+                beanType = predictBeanType(beanName, mbd, FactoryBean.class);
+                if (beanType == null || !FactoryBean.class.isAssignableFrom(beanType)) {
+                    return false;
+                }
+            }
+
+            return typeToMatch.isAssignableFrom(beanType);
+        }
+
+    }
+
+    protected Class<?> predictBeanType(String beanName, RootBeanDefinition mbd, Class<?>... typesToMatch) {
+        if (mbd.getFactoryMethodName() != null) {
+            return null;
+        }
+        return resolveBeanClass(mbd, beanName, typesToMatch);
+    }
+
+    protected Class<?> resolveBeanClass(final RootBeanDefinition mbd, String beanName, final Class<?>... typesToMatch) {
+        if (mbd.hasBeanClass()) {
+            return mbd.getBeanClass();
+        }
+
+        return doResolveBeanClass(mbd, typesToMatch);
+    }
+
+    private Class<?> doResolveBeanClass(RootBeanDefinition mbd, Class<?>... typesToMatch) {
+        if (!ObjectUtils.isEmpty(typesToMatch)) {
+            String className = mbd.getBeanClassName();
+            Class clazz = null;
+            try {
+                clazz = Class.forName(className);
+            } catch (ClassNotFoundException e) {
+                e.printStackTrace();
+            }
+            //return (className != null ? ClassUtils.forName(className, tempClassLoader) : null);
+            return (className != null ? clazz : null);
+
+        }
+
+        return null;
+    }
+
+
+    public boolean isFactoryDereference(String name) {
+        return (name != null && name.startsWith(BeanFactory.FACTORY_BEAN_PREFIX));
+    }
+
+    protected Class<?> getTypeForFactoryBean(final FactoryBean<?> factoryBean) {
+        return factoryBean.getObjectType();
+    }
+
+    protected Class<?> getTypeForFactoryBean(String beanName, RootBeanDefinition mbd) {
+        if (!mbd.isSingleton()) {
+            return null;
+        }
+
+        FactoryBean<?> factoryBean = null;
+        try {
+            factoryBean = doGetBean(FACTORY_BEAN_PREFIX + beanName, FactoryBean.class, null, true);
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+        return getTypeForFactoryBean(factoryBean);
+
+    }
 
     // todo 现在的判断规则过于简单
     public boolean isFactoryBean(String name) {

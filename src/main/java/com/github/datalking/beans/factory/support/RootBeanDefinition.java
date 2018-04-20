@@ -1,6 +1,7 @@
 package com.github.datalking.beans.factory.support;
 
 import com.github.datalking.beans.factory.config.BeanDefinition;
+import com.github.datalking.beans.factory.config.BeanDefinitionHolder;
 
 import java.lang.reflect.Method;
 
@@ -11,8 +12,10 @@ import java.lang.reflect.Method;
  */
 public class RootBeanDefinition extends AbstractBeanDefinition {
 
-
     volatile Class<?> resolvedTargetType;
+
+    private BeanDefinitionHolder decoratedDefinition;
+
 
     // volatile ResolvableType targetType;
     // volatile ResolvableType factoryMethodReturnType;
@@ -39,6 +42,8 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
     public RootBeanDefinition(RootBeanDefinition original) {
         super(original);
         this.resolvedTargetType = original.resolvedTargetType;
+        this.decoratedDefinition = original.decoratedDefinition;
+
     }
 
     public Class<?> getResolvedTargetType() {
@@ -47,6 +52,14 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 
     public void setResolvedTargetType(Class<?> resolvedTargetType) {
         this.resolvedTargetType = resolvedTargetType;
+    }
+
+    public BeanDefinitionHolder getDecoratedDefinition() {
+        return this.decoratedDefinition;
+    }
+
+    public void setDecoratedDefinition(BeanDefinitionHolder decoratedDefinition) {
+        this.decoratedDefinition = decoratedDefinition;
     }
 
     public boolean isFactoryMethod(Method candidate) {

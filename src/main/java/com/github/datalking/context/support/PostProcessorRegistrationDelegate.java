@@ -22,28 +22,31 @@ import java.util.List;
 public class PostProcessorRegistrationDelegate {
 
     public static void invokeBeanFactoryPostProcessors(
+            Collection<? extends BeanFactoryPostProcessor> postProcessors,
+            ConfigurableListableBeanFactory beanFactory) {
+
+        for (BeanFactoryPostProcessor postProcessor : postProcessors) {
+            postProcessor.postProcessBeanFactory(beanFactory);
+        }
+
+    }
+
+    public static void invokeBeanFactoryPostProcessors(
             ConfigurableListableBeanFactory beanFactory,
             List<BeanFactoryPostProcessor> beanFactoryPostProcessors) {
 
-
-        /// 如果beanFactory可注册BeanDefinition
+        /// 如果beanFactory是可注册BeanDefinition的
         if (beanFactory instanceof BeanDefinitionRegistry) {
 
             BeanDefinitionRegistry registry = (BeanDefinitionRegistry) beanFactory;
 
-
+            // 获取BeanDefinitionRegistryPostProcessor类型的bean名称
             String[] postProcessorNames = beanFactory.getBeanNamesForType(BeanDefinitionRegistryPostProcessor.class);
 
             // 实例化默认的后置处理器，包括ConfigurationClassPostProcessor
             List<BeanDefinitionRegistryPostProcessor> priorityOrderedPostProcessors = new ArrayList<>();
             for (String ppName : postProcessorNames) {
-
-                try {
-                    priorityOrderedPostProcessors.add((BeanDefinitionRegistryPostProcessor) beanFactory.getBean(ppName));
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-
+                priorityOrderedPostProcessors.add((BeanDefinitionRegistryPostProcessor) beanFactory.getBean(ppName));
             }
 
             // 扫描@Configuration、@Bean、@ComponentScan
@@ -70,35 +73,26 @@ public class PostProcessorRegistrationDelegate {
     }
 
 
-    private static void invokeBeanFactoryPostProcessors(
-            Collection<? extends BeanFactoryPostProcessor> postProcessors,
-            ConfigurableListableBeanFactory beanFactory) {
-
-        for (BeanFactoryPostProcessor postProcessor : postProcessors) {
-            postProcessor.postProcessBeanFactory(beanFactory);
-        }
-
-    }
-
     public static void registerBeanPostProcessors(ConfigurableListableBeanFactory beanFactory, AbstractApplicationContext applicationContext) {
 
         // 获取BeanPostProcessor类型的bean名
         String[] postProcessorNames = beanFactory.getBeanNamesForType(BeanPostProcessor.class);
 
         List<BeanPostProcessor> priorityOrderedPostProcessors = new ArrayList<>();
-        List<BeanPostProcessor> internalPostProcessors = new ArrayList<>();
         List<String> orderedPostProcessorNames = new ArrayList<>();
         List<String> nonOrderedPostProcessorNames = new ArrayList<>();
+        //List<BeanPostProcessor> internalPostProcessors = new ArrayList<>();
 
 
         for (String ppName : postProcessorNames) {
 
             if (beanFactory.isTypeMatch(ppName, PriorityOrdered.class)) {
-                BeanPostProcessor pp = beanFactory.getBean(ppName, BeanPostProcessor.class);
+                //BeanPostProcessor pp = beanFactory.getBean(ppName, BeanPostProcessor.class);
+                BeanPostProcessor pp = (BeanPostProcessor) beanFactory.getBean(ppName);
                 priorityOrderedPostProcessors.add(pp);
-                if (pp instanceof MergedBeanDefinitionPostProcessor) {
-                    internalPostProcessors.add(pp);
-                }
+//                if (pp instanceof MergedBeanDefinitionPostProcessor) {
+//                    internalPostProcessors.add(pp);
+//                }
 
             } else if (beanFactory.isTypeMatch(ppName, Ordered.class)) {
                 orderedPostProcessorNames.add(ppName);
@@ -110,17 +104,28 @@ public class PostProcessorRegistrationDelegate {
 
 
         // 下面实例化 AutoProxyCreator
-        List<BeanPostProcessor> orderedPostProcessors = new ArrayList<BeanPostProcessor>();
+        List<BeanPostProcessor> orderedPostProcessors = new ArrayList<>();
         for (String ppName : orderedPostProcessorNames) {
-            BeanPostProcessor pp = beanFactory.getBean(ppName, BeanPostProcessor.class);
+            //BeanPostProcessor pp = beanFactory.getBean(ppName, BeanPostProcessor.class);
+            BeanPostProcessor pp = (BeanPostProcessor) beanFactory.getBean(ppName);
             orderedPostProcessors.add(pp);
-            if (pp instanceof MergedBeanDefinitionPostProcessor) {
-                internalPostProcessors.add(pp);
-            }
+//            if (pp instanceof MergedBeanDefinitionPostProcessor) {
+//                internalPostProcessors.add(pp);
+//            }
         }
 
-        registerBeanPostProcessors(beanFactory, nonOrderedPostProcessors);
+        registerBeanPostProcessors(beanFactory, orderedPostProcessors);
 
+        List<BeanPostProcessor> nonOrderedPostProcessors = new ArrayList<BeanPostProcessor>();
+        for (String ppName : nonOrderedPostProcessorNames) {
+            //BeanPostProcessor pp = beanFactory.getBean(ppName, BeanPostProcessor.class);
+            BeanPostProcessor pp = (BeanPostProcessor) beanFactory.getBean(ppName);
+            nonOrderedPostProcessors.add(pp);
+//            if (pp instanceof MergedBeanDefinitionPostProcessor) {
+//                internalPostProcessors.add(pp);
+//            }
+        }
+        registerBeanPostProcessors(beanFactory, nonOrderedPostProcessors);
 
 
     }
