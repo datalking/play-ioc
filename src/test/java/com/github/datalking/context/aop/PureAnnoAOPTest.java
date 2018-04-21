@@ -5,7 +5,7 @@ import com.github.datalking.annotation.Configuration;
 import com.github.datalking.annotation.EnableAspectJAutoProxy;
 import com.github.datalking.bean.FooInterface;
 import com.github.datalking.bean.FooService;
-import com.github.datalking.bean.aop.MyAspect;
+import com.github.datalking.bean1.aop.MyAspect;
 import com.github.datalking.context.ApplicationContext;
 import com.github.datalking.context.annotation.AnnotationConfigApplicationContext;
 import org.junit.Test;

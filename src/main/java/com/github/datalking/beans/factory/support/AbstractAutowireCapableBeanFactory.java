@@ -6,9 +6,12 @@ import com.github.datalking.beans.MutablePropertyValues;
 import com.github.datalking.beans.PropertyValue;
 import com.github.datalking.beans.factory.config.AutowireCapableBeanFactory;
 import com.github.datalking.beans.factory.config.BeanDefinition;
+import com.github.datalking.beans.factory.config.BeanPostProcessor;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.security.AccessController;
+import java.security.PrivilegedAction;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -51,7 +54,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 
         BeanWrapper instanceWrapper = null;
 
-        // 调用无参构造函数新建bean实例，尚未注入属性
+        //==== 调用无参构造函数新建bean实例，尚未注入属性
         instanceWrapper = createBeanInstance(beanName, bd, args);
         final Object bean = (instanceWrapper != null ? instanceWrapper.getWrappedInstance() : null);
 
@@ -63,24 +66,24 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
         }
 
 
-        //注入属性
+        //==== 注入属性
         populateBean(beanName, bd, instanceWrapper);
 
-//        Object exposedObject = bean;
-//        if(exposedObject!=null){
-//            //调用配置的init方法
-//            exposedObject = initializeBean(beanName, exposedObject, mbd);
-//
-//        }
+        Object exposedObject = bean;
+        if (exposedObject != null) {
+
+            //==== 调用bean的初始化方法和  afterPropertiesSet() > afterInitialize
+            exposedObject = initializeBean(beanName, exposedObject, bd);
+        }
 
         //注册bean销毁的方法
 //      registerDisposableBeanIfNecessary(beanName, bean, mbd);
 
 
-        return bean;
+        return exposedObject;
     }
 
-    protected BeanWrapper createBeanInstance(String beanName, RootBeanDefinition bd, Object[] args)  {
+    protected BeanWrapper createBeanInstance(String beanName, RootBeanDefinition bd, Object[] args) {
 
 //        Class beanClass = doResolveBeanClass(bd);
 //        bd.setBeanClass(beanClass);
@@ -102,7 +105,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
      * 通过jdk反射生成bean实例
      * spring对调用无参构造函数生成实例使用的是cglib
      */
-    private BeanWrapper instantiateBean(final String beanName, final RootBeanDefinition bd)  {
+    private BeanWrapper instantiateBean(final String beanName, final RootBeanDefinition bd) {
 
         Object beanInstance = null;
         try {
@@ -119,7 +122,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 
     }
 
-    private void populateBean(String beanName, RootBeanDefinition bd, BeanWrapper bw)  {
+    private void populateBean(String beanName, RootBeanDefinition bd, BeanWrapper bw) {
 
         applyPropertyValues(beanName, bd, bw);
 
@@ -201,7 +204,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
      * @param bd       要添加的属性定义
      * @param bw       beanWrapper实例
      */
-    protected void applyPropertyValues(String beanName, BeanDefinition bd, BeanWrapper bw)  {
+    protected void applyPropertyValues(String beanName, BeanDefinition bd, BeanWrapper bw) {
 
         List<PropertyValue> pvList = bd.getPropertyValues().getPropertyValueList();
         List<PropertyValue> deepCopy = new ArrayList<>(pvList.size());
@@ -237,6 +240,60 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 
 
     }
+
+    protected Object initializeBean(final String beanName, final Object bean, RootBeanDefinition mbd) {
+
+        // 执行aware相关方法
+        // invokeAwareMethods(beanName, bean);
+
+        Object wrappedBean = bean;
+
+        // 执行 初始化前 处理器
+        wrappedBean = applyBeanPostProcessorsBeforeInitialization(wrappedBean, beanName);
+
+        // 执行 afterPropertiesSet()
+        //invokeInitMethods(beanName, wrappedBean, mbd);
+
+        // 依次调用所有 初始化后 处理器，生成代理对象
+        wrappedBean = applyBeanPostProcessorsAfterInitialization(wrappedBean, beanName);
+
+        // 如果启用了AOP此处应该返回了代理对象，也就是说原来初始化的bean被替换了。
+        return wrappedBean;
+    }
+
+
+    //@Override
+    public Object applyBeanPostProcessorsBeforeInitialization(Object existingBean, String beanName) {
+
+        Object result = existingBean;
+        List<BeanPostProcessor> bppList = getBeanPostProcessors();
+        for (BeanPostProcessor bpp : bppList) {
+            result = bpp.postProcessBeforeInitialization(result, beanName);
+            if (result == null) {
+                return result;
+            }
+        }
+        return result;
+    }
+
+    //@Override
+    public Object applyBeanPostProcessorsAfterInitialization(Object existingBean, String beanName) {
+
+        Object result = existingBean;
+        List<BeanPostProcessor> bppList = getBeanPostProcessors();
+
+        for (BeanPostProcessor bpp : bppList) {
+
+            // 执行BeanPostProcessor，可以生成的代理对象
+            result = bpp.postProcessAfterInitialization(result, beanName);
+
+            if (result == null) {
+                return result;
+            }
+        }
+        return result;
+    }
+
 
     public Class<?> doResolveBeanClass(RootBeanDefinition bd) {
         return doResolveBeanClass((AbstractBeanDefinition) bd);

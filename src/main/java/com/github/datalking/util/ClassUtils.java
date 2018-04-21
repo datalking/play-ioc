@@ -20,12 +20,11 @@ public abstract class ClassUtils {
     private static final Map<Class<?>, Class<?>> primitiveTypeToWrapperMap = new IdentityHashMap<>(8);
 
 
-
     public static Set<Class<?>> getAllInterfacesForClassAsSet(Class<?> clazz) {
         return getAllInterfacesForClassAsSet(clazz, null);
     }
 
-    public static Set<Class<?>> getAllInterfacesForClassAsSet(Class<?> clazz,ClassLoader classLoader) {
+    public static Set<Class<?>> getAllInterfacesForClassAsSet(Class<?> clazz, ClassLoader classLoader) {
         Assert.notNull(clazz, "Class must not be null");
 
         if (clazz.isInterface() && isVisible(clazz, classLoader)) {
@@ -37,7 +36,7 @@ public abstract class ClassUtils {
             for (Class<?> ifc : ifcs) {
 
                 // 递归查询并加入
-                interfaces.addAll(getAllInterfacesForClassAsSet(ifc,classLoader));
+                interfaces.addAll(getAllInterfacesForClassAsSet(ifc, classLoader));
             }
             clazz = clazz.getSuperclass();
         }
@@ -51,36 +50,41 @@ public abstract class ClassUtils {
         try {
             Class<?> actualClass = classLoader.loadClass(clazz.getName());
             return (clazz == actualClass);
-        }
-        catch (ClassNotFoundException ex) {
+        } catch (ClassNotFoundException ex) {
             return false;
         }
-    }
-
-    public static boolean isAssignable(Class<?> lhsType, Class<?> rhsType) {
-        Assert.notNull(lhsType, "Left-hand side type must not be null");
-        Assert.notNull(rhsType, "Right-hand side type must not be null");
-        if (lhsType.isAssignableFrom(rhsType)) {
-            return true;
-        }
-        if (lhsType.isPrimitive()) {
-            Class<?> resolvedPrimitive = primitiveWrapperTypeMap.get(rhsType);
-            if (lhsType == resolvedPrimitive) {
-                return true;
-            }
-        } else {
-            Class<?> resolvedWrapper = primitiveTypeToWrapperMap.get(rhsType);
-            if (resolvedWrapper != null && lhsType.isAssignableFrom(resolvedWrapper)) {
-                return true;
-            }
-        }
-        return false;
     }
 
     public static boolean isAssignableValue(Class<?> type, Object value) {
         Assert.notNull(type, "Type must not be null");
         return (value != null ? isAssignable(type, value.getClass()) : !type.isPrimitive());
     }
+
+    /**
+     * 判断c1是否是c2的父类或父接口
+     */
+    public static boolean isAssignable(Class<?> c1, Class<?> c2) {
+        Assert.notNull(c1, "Left-hand side type must not be null");
+        Assert.notNull(c2, "Right-hand side type must not be null");
+
+        if (c1.isAssignableFrom(c2)) {
+            return true;
+        }
+
+//        if (c1.isPrimitive()) {
+//            Class<?> resolvedPrimitive = primitiveWrapperTypeMap.get(c2);
+//            if (c1 == resolvedPrimitive) {
+//                return true;
+//            }
+//        } else {
+//            Class<?> resolvedWrapper = primitiveTypeToWrapperMap.get(c2);
+//            if (resolvedWrapper != null && c1.isAssignableFrom(resolvedWrapper)) {
+//                return true;
+//            }
+//        }
+        return false;
+    }
+
 
     public static Method getMostSpecificMethod(Method method, Class<?> targetClass) {
         if (method != null && isOverridable(method, targetClass) &&

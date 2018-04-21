@@ -128,11 +128,10 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
         return getMergedBeanDefinition(beanName, bd, null);
     }
 
-    protected RootBeanDefinition getMergedBeanDefinition(String beanName, BeanDefinition bd, BeanDefinition
-            containingBd) {
+    protected RootBeanDefinition getMergedBeanDefinition(String beanName, BeanDefinition bd, BeanDefinition containingBd) {
 
         synchronized (this.mergedBeanDefinitions) {
-            RootBeanDefinition mbd = null;
+            RootBeanDefinition mbd;
 
             if (bd instanceof RootBeanDefinition) {
                 mbd = ((RootBeanDefinition) bd).cloneBeanDefinition();
@@ -182,16 +181,20 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
         return this.hasInstantiationAwareBeanPostProcessors;
     }
 
+
     @Override
     public boolean isTypeMatch(String name, Class<?> targetType) {
+
         //String beanName = transformedBeanName(name);
         String beanName = name;
         Class<?> typeToMatch = (targetType != null ? targetType : Object.class);
 
-        // Check manually registered singletons.
+        // 在 singletonObjects 和 earlySingletonObjects 中查找beanName
         Object beanInstance = getSingleton(beanName, false);
-        if (beanInstance != null) {
 
+        /// 如果bean不为空
+        if (beanInstance != null) {
+            /// 如果 beanInstance是FactoryBean
             if (beanInstance instanceof FactoryBean) {
                 if (!isFactoryDereference(name)) {
                     Class<?> type = getTypeForFactoryBean((FactoryBean<?>) beanInstance);
@@ -199,24 +202,29 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
                 } else {
                     return ClassUtils.isAssignableValue(typeToMatch, beanInstance);
                 }
-            } else {
+            }
+            /// 如果 beanInstance不是FactoryBean，直接比较class
+            else {
                 return !isFactoryDereference(name) && ClassUtils.isAssignableValue(typeToMatch, beanInstance);
             }
+        }
 
-        } else if (containsSingleton(beanName) && !containsBeanDefinition(beanName)) {
-            // 注册 null实例
+        /// 若bean为空，且beanDefinition不存在
+        else if (containsSingleton(beanName) && !containsBeanDefinition(beanName)) {
             return false;
+        }
 
-        } else {
+        /// 如果bean为空，处理其他情况
+        else {
 
             RootBeanDefinition mbd = getMergedLocalBeanDefinition(beanName);
 
             Class<?>[] typesToMatch = (FactoryBean.class.equals(typeToMatch) ?
-                    new Class<?>[]{typeToMatch} : new Class<?>[]{FactoryBean.class, typeToMatch});
+                    new Class<?>[]{typeToMatch} :
+                    new Class<?>[]{FactoryBean.class, typeToMatch});
 
             BeanDefinitionHolder dbd = mbd.getDecoratedDefinition();
-
-            if (mbd != null && !isFactoryDereference(name)) {
+            if (dbd != null && !isFactoryDereference(name)) {
                 RootBeanDefinition tbd = getMergedBeanDefinition(dbd.getBeanName(), dbd.getBeanDefinition(), mbd);
                 Class<?> targetClass = predictBeanType(dbd.getBeanName(), tbd, typesToMatch);
                 if (targetClass != null && !FactoryBean.class.isAssignableFrom(targetClass)) {
@@ -224,22 +232,24 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
                 }
             }
 
+            //简单地根据 RootBeanDefinition的getBeanClass() 预测bean类型
             Class<?> beanType = predictBeanType(beanName, mbd, typesToMatch);
 
             if (beanType == null) {
                 return false;
             }
 
+            /// 若是普通FactoryBean
             if (FactoryBean.class.isAssignableFrom(beanType)) {
                 if (!isFactoryDereference(name)) {
-                    // If it's a FactoryBean, we want to look at what it creates, not the factory class.
                     beanType = getTypeForFactoryBean(beanName, mbd);
                     if (beanType == null) {
                         return false;
                     }
                 }
-            } else if (isFactoryDereference(name)) {
-
+            }
+            /// 若是特殊FactoryBean
+            if (isFactoryDereference(name)) {
                 beanType = predictBeanType(beanName, mbd, FactoryBean.class);
                 if (beanType == null || !FactoryBean.class.isAssignableFrom(beanType)) {
                     return false;
@@ -251,6 +261,10 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
 
     }
 
+    /**
+     * 根据RootBeanDefinition的getBeanClass()预测bean类型
+     * 只是简单的判断，不处理FactoryBean和InstantiationAwareBeanPostProcessors
+     */
     protected Class<?> predictBeanType(String beanName, RootBeanDefinition mbd, Class<?>... typesToMatch) {
         if (mbd.getFactoryMethodName() != null) {
             return null;
@@ -262,28 +276,30 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
         if (mbd.hasBeanClass()) {
             return mbd.getBeanClass();
         }
-
         return doResolveBeanClass(mbd, typesToMatch);
     }
 
     private Class<?> doResolveBeanClass(RootBeanDefinition mbd, Class<?>... typesToMatch) {
-        if (!ObjectUtils.isEmpty(typesToMatch)) {
-            String className = mbd.getBeanClassName();
-            Class clazz = null;
-            try {
-                clazz = Class.forName(className);
-            } catch (ClassNotFoundException e) {
-                e.printStackTrace();
-            }
-            //return (className != null ? ClassUtils.forName(className, tempClassLoader) : null);
-            return (className != null ? clazz : null);
 
+        if (typesToMatch != null && typesToMatch.length > 0) {
+
+            Class clazz = null;
+            for (Class c : typesToMatch) {
+                try {
+                    clazz = Class.forName(c.getName());
+                } catch (ClassNotFoundException e) {
+                    e.printStackTrace();
+                }
+            }
+
+            String className = mbd.getBeanClassName();
+            return (className != null ? clazz : null);
         }
 
         return null;
     }
 
-
+    // 根据name名称判断是否是FactoryBean
     public boolean isFactoryDereference(String name) {
         return (name != null && name.startsWith(BeanFactory.FACTORY_BEAN_PREFIX));
     }

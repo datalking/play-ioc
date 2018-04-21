@@ -27,7 +27,7 @@ public class BeanFactoryAdvisorRetrievalHelper {
      */
     public List<Advisor> findAdvisorBeans() {
 
-        String[] advisorNames = null;
+        String[] advisorNames;
         synchronized (this) {
             advisorNames = this.cachedAdvisorBeanNames;
             if (advisorNames == null) {

@@ -81,10 +81,10 @@ public abstract class AbstractApplicationContext implements ConfigurableApplicat
             // 读取xml配置文件
             obtainFreshBeanFactory();
 
-            // 激活各种BeanFactoryPostProcessor，如扫描@Configuration、@Bean、@ComponentScan
+            // 执行各种BeanFactoryPostProcessor，如扫描@Configuration、@Bean、@ComponentScan
             invokeBeanFactoryPostProcessors(beanFactory);
 
-            // 注册拦截bean创建的bean处理器，这里只是注册，真正的调用是在getBean
+            // 注册各种BeanPostProcessor，只注册，真正的调用是在getBean
             // 实例化各种内部bean，如AnnotationAwareAspectJAutoProxyCreator
             registerBeanPostProcessors(beanFactory);
 

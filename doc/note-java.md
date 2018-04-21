@@ -7,6 +7,13 @@ java笔记
 
 ## summary
 
+
+- 当参数是可变长的rest参数时，取到参数变量当做数组处理
+
+- A.isAssignableFrom(B)
+    - 判断 A是否是B的父类或父接口，即 B extends A
+    - A与B必须同为类或同为接口
+
 - java 注解
     - AnnotatedElement接口代表程序中可以接受注解的程序元素.像Class Constructor FieldMethod Package这些类都实现了AnnotatedElement接口.
 

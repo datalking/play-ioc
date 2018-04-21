@@ -10,10 +10,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
+ * 封装advice为advisor
+ *
  * @author yaoo on 4/19/18
  */
 public class DefaultAdvisorAdapterRegistry implements AdvisorAdapterRegistry, Serializable {
-
 
     private final List<AdvisorAdapter> adapters = new ArrayList<>(3);
 

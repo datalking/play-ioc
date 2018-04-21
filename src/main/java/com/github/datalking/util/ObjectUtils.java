@@ -68,11 +68,7 @@ public abstract class ObjectUtils {
     }
 
     /**
-     * Determine whether the given array is empty:
-     * i.e. {@code null} or of zero length.
-     *
-     * @param array the array to check
-     * @see #isEmpty(Object)
+     * 判断数组是否为空
      */
     public static boolean isEmpty(Object[] array) {
         return (array == null || array.length == 0);

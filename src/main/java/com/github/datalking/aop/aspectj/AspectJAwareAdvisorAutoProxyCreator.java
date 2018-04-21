@@ -1,6 +1,7 @@
 package com.github.datalking.aop.aspectj;
 
 import com.github.datalking.aop.Advisor;
+import com.github.datalking.aop.aspectj.jadvice.AbstractAspectJAdvice;
 import com.github.datalking.aop.framework.AbstractAdvisorAutoProxyCreator;
 
 import java.util.List;
@@ -16,10 +17,22 @@ public class AspectJAwareAdvisorAutoProxyCreator extends AbstractAdvisorAutoProx
         return null;
     }
 
-    public boolean shouldSkip(Class<?> beanClass, String beanName) {
+    @Override
+    protected boolean shouldSkip(Class<?> beanClass, String beanName) {
+        // TODO:缓存名称
+        List<Advisor> candidateAdvisors = findCandidateAdvisors();
 
-        return false;
+        for (Advisor advisor : candidateAdvisors) {
+            if (advisor instanceof AspectJPointcutAdvisor) {
+                if (((AbstractAspectJAdvice) advisor.getAdvice()).getAspectName().equals(beanName)) {
+                    return true;
+                }
+            }
+        }
+
+        return super.shouldSkip(beanClass, beanName);
     }
 
 
-    }
+
+}

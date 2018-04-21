@@ -90,11 +90,17 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
      * 通过调用getBean()触发实例化bean
      */
     @Override
-    public void preInstantiateSingletons() throws Exception {
+    public void preInstantiateSingletons() {
 
+        // 遍历的是副本，此时仍然可以beanDefinition
         List<String> beanNames = new ArrayList<>(this.beanDefinitionNames);
 
         for (String beanName : beanNames) {
+
+            if (beanName.equals("fooService")) {
+                System.out.println("====preInstantiateSingletons: " + beanName);
+            }
+
             getBean(beanName);
         }
 

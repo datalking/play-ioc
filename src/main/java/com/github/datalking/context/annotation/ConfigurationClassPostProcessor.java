@@ -8,11 +8,10 @@ import com.github.datalking.beans.factory.support.AbstractAutowireCapableBeanFac
 import com.github.datalking.beans.factory.support.AbstractBeanDefinition;
 import com.github.datalking.beans.factory.support.BeanDefinitionRegistry;
 import com.github.datalking.beans.factory.support.BeanDefinitionRegistryPostProcessor;
-import com.github.datalking.beans.factory.support.RootBeanDefinition;
+import com.github.datalking.common.Ordered;
+import com.github.datalking.common.PriorityOrdered;
 
-import java.util.ArrayList;
 import java.util.LinkedHashSet;
-import java.util.List;
 import java.util.Set;
 
 /**
@@ -21,7 +20,8 @@ import java.util.Set;
  *
  * @author yaoo on 4/13/18
  */
-public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPostProcessor {
+public class ConfigurationClassPostProcessor
+        implements BeanDefinitionRegistryPostProcessor,PriorityOrdered {
 
 
     //private ConfigurationClassBeanDefinitionReader reader;
@@ -89,6 +89,12 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
         // 将标注@Bean注解的bean注册到beanDefinitionMap
         reader.loadBeanDefinitions(configClasses);
 
+    }
+
+
+    @Override
+    public int getOrder() {
+        return Ordered.LOWEST_PRECEDENCE;
     }
 
 

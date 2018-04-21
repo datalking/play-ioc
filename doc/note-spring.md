@@ -3,6 +3,9 @@ Spring笔记
 
 ## summary
 
+- singletonObjects里面的对象可以比beanDefinitionMaps的多
+
+- 创建代理对象时，aspect切面对象可以不存在
 
 - Advice接口是AOP联盟定义的一个空的标记接口，Advice有几个子接口：
     - BeforeAdvice，前置增强，意思是在我们的目标类之前调用的增强。这个接口也没有定义任何方法。

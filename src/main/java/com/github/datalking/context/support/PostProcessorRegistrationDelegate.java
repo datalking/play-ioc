@@ -73,7 +73,8 @@ public class PostProcessorRegistrationDelegate {
     }
 
 
-    public static void registerBeanPostProcessors(ConfigurableListableBeanFactory beanFactory, AbstractApplicationContext applicationContext) {
+    public static void registerBeanPostProcessors(ConfigurableListableBeanFactory beanFactory,
+                                                  AbstractApplicationContext applicationContext) {
 
         // 获取BeanPostProcessor类型的bean名
         String[] postProcessorNames = beanFactory.getBeanNamesForType(BeanPostProcessor.class);
@@ -81,7 +82,6 @@ public class PostProcessorRegistrationDelegate {
         List<BeanPostProcessor> priorityOrderedPostProcessors = new ArrayList<>();
         List<String> orderedPostProcessorNames = new ArrayList<>();
         List<String> nonOrderedPostProcessorNames = new ArrayList<>();
-        //List<BeanPostProcessor> internalPostProcessors = new ArrayList<>();
 
 
         for (String ppName : postProcessorNames) {
@@ -90,10 +90,6 @@ public class PostProcessorRegistrationDelegate {
                 //BeanPostProcessor pp = beanFactory.getBean(ppName, BeanPostProcessor.class);
                 BeanPostProcessor pp = (BeanPostProcessor) beanFactory.getBean(ppName);
                 priorityOrderedPostProcessors.add(pp);
-//                if (pp instanceof MergedBeanDefinitionPostProcessor) {
-//                    internalPostProcessors.add(pp);
-//                }
-
             } else if (beanFactory.isTypeMatch(ppName, Ordered.class)) {
                 orderedPostProcessorNames.add(ppName);
             } else {
@@ -102,36 +98,26 @@ public class PostProcessorRegistrationDelegate {
         }
         registerBeanPostProcessors(beanFactory, priorityOrderedPostProcessors);
 
-
         // 下面实例化 AutoProxyCreator
         List<BeanPostProcessor> orderedPostProcessors = new ArrayList<>();
         for (String ppName : orderedPostProcessorNames) {
-            //BeanPostProcessor pp = beanFactory.getBean(ppName, BeanPostProcessor.class);
             BeanPostProcessor pp = (BeanPostProcessor) beanFactory.getBean(ppName);
             orderedPostProcessors.add(pp);
-//            if (pp instanceof MergedBeanDefinitionPostProcessor) {
-//                internalPostProcessors.add(pp);
-//            }
         }
 
         registerBeanPostProcessors(beanFactory, orderedPostProcessors);
 
         List<BeanPostProcessor> nonOrderedPostProcessors = new ArrayList<BeanPostProcessor>();
         for (String ppName : nonOrderedPostProcessorNames) {
-            //BeanPostProcessor pp = beanFactory.getBean(ppName, BeanPostProcessor.class);
             BeanPostProcessor pp = (BeanPostProcessor) beanFactory.getBean(ppName);
             nonOrderedPostProcessors.add(pp);
-//            if (pp instanceof MergedBeanDefinitionPostProcessor) {
-//                internalPostProcessors.add(pp);
-//            }
         }
         registerBeanPostProcessors(beanFactory, nonOrderedPostProcessors);
 
-
     }
 
-    private static void registerBeanPostProcessors(
-            ConfigurableListableBeanFactory beanFactory, List<BeanPostProcessor> postProcessors) {
+    private static void registerBeanPostProcessors(ConfigurableListableBeanFactory beanFactory,
+                                                   List<BeanPostProcessor> postProcessors) {
 
         for (BeanPostProcessor postProcessor : postProcessors) {
             beanFactory.addBeanPostProcessor(postProcessor);

@@ -1,6 +1,7 @@
 package com.github.datalking.aop.framework;
 
 import com.github.datalking.aop.Advisor;
+import com.github.datalking.aop.Pointcut;
 import com.github.datalking.aop.SingletonTargetSource;
 import com.github.datalking.aop.TargetSource;
 import com.github.datalking.aop.framework.adapter.AdvisorAdapterRegistry;
@@ -8,31 +9,51 @@ import com.github.datalking.aop.framework.adapter.GlobalAdvisorAdapterRegistry;
 import com.github.datalking.beans.PropertyValues;
 import com.github.datalking.beans.factory.BeanFactory;
 import com.github.datalking.beans.factory.BeanFactoryAware;
+import com.github.datalking.beans.factory.FactoryBean;
 import com.github.datalking.beans.factory.config.ConfigurableBeanFactory;
 import com.github.datalking.beans.factory.config.SmartInstantiationAwareBeanPostProcessor;
+import com.github.datalking.common.Ordered;
+import com.github.datalking.util.StringUtils;
+import org.aopalliance.aop.Advice;
 
 import java.beans.PropertyDescriptor;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
+ * 创建代理对象 抽象类
+ *
  * @author yaoo on 4/18/18
  */
 public abstract class AbstractAutoProxyCreator extends ProxyConfig
-        implements SmartInstantiationAwareBeanPostProcessor, BeanFactoryAware {
+        implements SmartInstantiationAwareBeanPostProcessor, BeanFactoryAware, Ordered {
 
-    // 不使用代理
+    // 不使用代理的标志
     protected static final Object[] DO_NOT_PROXY = null;
-
+    // 无增强方法的代理对象的标识
+    protected static final Object[] PROXY_WITHOUT_ADDITIONAL_INTERCEPTORS = new Object[0];
 
     private BeanFactory beanFactory;
-
+    // 获取单例对象，封装advice为advisor
     private AdvisorAdapterRegistry advisorAdapterRegistry = GlobalAdvisorAdapterRegistry.getInstance();
 
-    // 拦截器 默认为空
+    // 拦截器，默认为空
     private String[] interceptorNames = new String[0];
 
+    private int order = Ordered.LOWEST_PRECEDENCE;
+
+    // 在postProcessBeforeInstantiation()中成功创建的代理对象都会将beanName加入到targetSourceBeans中
+    private final Set<String> targetSourcedBeans = Collections.newSetFromMap(new ConcurrentHashMap<>(16));
+
+    // 作为缓存，存储已经创建代理后的bean和无需代理的bean
+    private final Map<Object, Boolean> advisedBeans = new ConcurrentHashMap<>(256);
+
+    protected abstract Object[] getAdvicesAndAdvisorsForBean(Class<?> beanClass, String beanName, TargetSource customTargetSource);
 
     @Override
     public void setBeanFactory(BeanFactory beanFactory) {
@@ -63,7 +84,6 @@ public abstract class AbstractAutoProxyCreator extends ProxyConfig
 
     @Override
     public PropertyValues postProcessPropertyValues(PropertyValues pvs, PropertyDescriptor[] pds, Object bean, String beanName) {
-
         return pvs;
     }
 
@@ -72,24 +92,37 @@ public abstract class AbstractAutoProxyCreator extends ProxyConfig
         return bean;
     }
 
+    /**
+     * 默认创建代理对象的方法
+     */
     @Override
     public Object postProcessAfterInitialization(Object bean, String beanName) {
 
         if (bean != null) {
             // 根据给定的 bean 的 class 和 name 构建出个 key，格式：beanClassName_beanName
-            // Object cacheKey = getCacheKey(bean.getClass(), beanName);
+            Object cacheKey = getCacheKey(bean.getClass(), beanName);
 
-            // if (!this.earlyProxyReferences.contains(cacheKey)) {
+            //if (!this.earlyProxyReferences.contains(cacheKey)) {
 
             // 如果它适合被代理，则需要封装指定 bean
-            return wrapIfNecessary(bean, beanName);
+            return wrapIfNecessary(bean, beanName, cacheKey);
             //}
         }
         return bean;
     }
 
+    /**
+     * 直接以beanClass作为缓存
+     */
+    protected Object getCacheKey(Class<?> beanClass, String beanName) {
+        if (StringUtils.hasLength(beanName)) {
+            return (FactoryBean.class.isAssignableFrom(beanClass) ? BeanFactory.FACTORY_BEAN_PREFIX + beanName : beanName);
+        } else {
+            return beanClass;
+        }
+    }
 
-    protected Object wrapIfNecessary(Object bean, String beanName) {
+    protected Object wrapIfNecessary(Object bean, String beanName, Object cacheKey) {
 
         // 是否已经处理过
 //        if (beanName != null && this.targetSourcedBeans.contains(beanName)) {
@@ -102,18 +135,19 @@ public abstract class AbstractAutoProxyCreator extends ProxyConfig
 //        }
 
         // 给定的 bean 类是否代表一个基础设施类，基础设施类不应代理，或者配置了指定 bean 不需要自动代理
-//        if (isInfrastructureClass(bean.getClass()) || shouldSkip(bean.getClass(), beanName)) {
-//            this.advisedBeans.put(cacheKey, Boolean.FALSE);
-//            return bean;
-//        }
+        // shouldKip()默认返回false
+        if (isInfrastructureClass(bean.getClass()) || shouldSkip(bean.getClass(), beanName)) {
+            this.advisedBeans.put(cacheKey, Boolean.FALSE);
+            return bean;
+        }
 
         // Create proxy if we have advice.
-        // 如果Bean是要被代理的对象的话，取得Bean相关的Interceptor
+        // 判断当前bean是否需要进行代理，若需要，则返回满足条件的Advice或者Advisor集合，取得Bean相关的Interceptor
         Object[] specificInterceptors = getAdvicesAndAdvisorsForBean(bean.getClass(), beanName, null);
 
         // 如果获取到了增强则需要针对增强创建代理
         if (specificInterceptors != DO_NOT_PROXY) {
-            //this.advisedBeans.put(cacheKey, Boolean.TRUE);
+            this.advisedBeans.put(cacheKey, Boolean.TRUE);
 
             //==== 创建代理
             Object proxy = createProxy(bean.getClass(), beanName, specificInterceptors, new SingletonTargetSource(bean));
@@ -122,7 +156,7 @@ public abstract class AbstractAutoProxyCreator extends ProxyConfig
             return proxy;
         }
 
-        //this.advisedBeans.put(cacheKey, Boolean.FALSE);
+        this.advisedBeans.put(cacheKey, Boolean.FALSE);
         return bean;
     }
 
@@ -139,7 +173,6 @@ public abstract class AbstractAutoProxyCreator extends ProxyConfig
 
         //判定给定的bean是否代理Class
 //        if (!proxyFactory.isProxyTargetClass()) {
-//
 //            if (shouldProxyTargetClass(beanClass, beanName)) {
 //                proxyFactory.setProxyTargetClass(true);
 //            } else {
@@ -208,8 +241,25 @@ public abstract class AbstractAutoProxyCreator extends ProxyConfig
     }
 
 
-    protected abstract Object[] getAdvicesAndAdvisorsForBean(Class<?> beanClass, String beanName, TargetSource customTargetSource);
+    protected boolean isInfrastructureClass(Class<?> beanClass) {
+        boolean retVal = Advice.class.isAssignableFrom(beanClass) ||
+                Pointcut.class.isAssignableFrom(beanClass) ||
+                Advisor.class.isAssignableFrom(beanClass);
+        return retVal;
+    }
 
+    protected boolean shouldSkip(Class<?> beanClass, String beanName) {
+        return false;
+    }
+
+    public void setOrder(int order) {
+        this.order = order;
+    }
+
+    @Override
+    public int getOrder() {
+        return this.order;
+    }
 
 }
 

@@ -96,10 +96,10 @@ public class DefaultSingletonBeanRegistry implements SingletonBeanRegistry {
 
     /**
      * 通过beanName获取bean实例
-     * 在所有三级缓存中找bean实例
+     * 在所有三级缓存中找bean实例：singletonObjects > earlySingletonObjects > singletonFactories
      *
      * @param beanName            bean名称
-     * @param allowEarlyReference 是否允许提前曝光
+     * @param allowEarlyReference 是否允许在第3级缓存中查找
      * @return bean实例
      */
     protected Object getSingleton(String beanName, boolean allowEarlyReference) {

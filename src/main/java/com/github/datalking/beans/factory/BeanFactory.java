@@ -7,12 +7,13 @@ public interface BeanFactory {
 
     String FACTORY_BEAN_PREFIX = "&";
 
-    //可以用别名查找
+    // 可以用别名查找
     Object getBean(String name);
 
     Class<?> getType(String name);
 
-    boolean isTypeMatch(String name, Class<?> typeToMatch);
+    // 检查name对应的bean是否是targetType的类型
+    boolean isTypeMatch(String name, Class<?> targetType);
 
 //    boolean isPrototype(String name) ;
 
