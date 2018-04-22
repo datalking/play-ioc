@@ -64,6 +64,13 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
             return null;
         }
 
+        RootBeanDefinition mbd = getMergedLocalBeanDefinition(beanName);
+        Class<?> beanClass = predictBeanType(beanName, mbd);
+
+        if (!isFactoryDereference(name)) {
+            return beanClass;
+        }
+
         return null;
     }
 
@@ -266,9 +273,14 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
      * 只是简单的判断，不处理FactoryBean和InstantiationAwareBeanPostProcessors
      */
     protected Class<?> predictBeanType(String beanName, RootBeanDefinition mbd, Class<?>... typesToMatch) {
+        Class<?> targetType = mbd.getTargetType();
+        if (targetType != null) {
+            return targetType;
+        }
         if (mbd.getFactoryMethodName() != null) {
             return null;
         }
+
         return resolveBeanClass(mbd, beanName, typesToMatch);
     }
 

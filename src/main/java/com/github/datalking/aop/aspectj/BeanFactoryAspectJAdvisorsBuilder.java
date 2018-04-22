@@ -59,6 +59,10 @@ public class BeanFactoryAspectJAdvisorsBuilder {
                         //循环所有beanName找出对应的增强方法
                         for (String beanName : beanNames) {
 
+                            if (beanName.equals("myAspect")) {
+                                System.out.println("==== BeanFactoryAspectJAdvisorsBuilder " + beanName);
+                            }
+
                             // 获取Bean的class列表
                             Class<?> beanType = this.beanFactory.getType(beanName);
                             if (beanType == null) {

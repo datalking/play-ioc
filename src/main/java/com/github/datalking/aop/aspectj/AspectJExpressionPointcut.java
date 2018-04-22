@@ -7,6 +7,7 @@ import com.github.datalking.aop.support.AbstractExpressionPointcut;
 import com.github.datalking.aop.support.AopUtils;
 import com.github.datalking.beans.factory.BeanFactory;
 import com.github.datalking.beans.factory.BeanFactoryAware;
+import com.github.datalking.util.Assert;
 import com.github.datalking.util.StringUtils;
 import org.aspectj.weaver.patterns.NamePattern;
 import org.aspectj.weaver.reflect.ReflectionWorld;
@@ -65,6 +66,7 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut implem
     private transient Map<Method, ShadowMatch> shadowMatchCache = new ConcurrentHashMap<>(32);
 
     public AspectJExpressionPointcut() {
+        buildPointcutExpression(this.getClass().getClassLoader());
     }
 
     public AspectJExpressionPointcut(Class<?> declarationScope, String[] paramNames, Class<?>[] paramTypes) {
@@ -74,6 +76,8 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut implem
         }
         this.pointcutParameterNames = paramNames;
         this.pointcutParameterTypes = paramTypes;
+
+        buildPointcutExpression(this.getClass().getClassLoader());
     }
 
     /**
@@ -118,6 +122,7 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut implem
 
     @Override
     public boolean matches(Class<?> targetClass) {
+        Assert.notNull(targetClass, "targetClass cannot be null!");
         return this.pointcutExpression.couldMatchJoinPointsInType(targetClass);
     }
 

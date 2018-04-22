@@ -11,7 +11,7 @@ import org.aspectj.lang.annotation.Before;
 public class MyAspect {
 
     @Before("execution(* bean..*.*(..))")
-    public void advice() {
+    public void before1() {
 
         System.out.println("====print before method called in package bean..*.*");
     }

@@ -8,6 +8,8 @@ import com.github.datalking.beans.factory.config.AutowireCapableBeanFactory;
 import com.github.datalking.beans.factory.config.BeanDefinition;
 import com.github.datalking.beans.factory.config.BeanPostProcessor;
 import com.github.datalking.beans.factory.config.InstantiationAwareBeanPostProcessor;
+import com.github.datalking.beans.factory.config.SmartInstantiationAwareBeanPostProcessor;
+import com.github.datalking.util.ObjectUtils;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -45,7 +47,17 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
             bd.setBeanClass(beanClass);
         }
 
-        return doCreateBean(beanName, bd, args);
+        // ==== 执行 BeanPostProcessor 的 postProcessBeforeInstantiation 和 postProcessAfterInitialization
+        Object bean = resolveBeforeInstantiation(beanName, bd);
+        // 如果生成的代理对象不为空，则直接返回
+        if (bean != null) {
+            return bean;
+        }
+
+        /// ==== 如果没有生成代理对象，就按正常流程走，生成Bean对象
+        Object beanInstance = doCreateBean(beanName, bd, args);
+
+        return beanInstance;
     }
 
 
@@ -71,7 +83,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
         Object exposedObject = bean;
         if (exposedObject != null) {
 
-            //==== 调用bean的初始化方法和  afterPropertiesSet() > afterInitialize
+            //==== 调用 postProcessBeforeInitialization > afterPropertiesSet > postProcessAfterInitialization
             exposedObject = initializeBean(beanName, exposedObject, bd);
         }
 
@@ -182,9 +194,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
             //beanInstance = this.beanFactory.getInstantiationStrategy().instantiate(mbd, beanName, this.beanFactory, factoryBean, factoryMethodToUse, argsToUse);
 
             beanInstance = factoryMethodToUse.invoke(factoryBean);
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
-        } catch (InvocationTargetException e) {
+        } catch (IllegalAccessException | InvocationTargetException e) {
             e.printStackTrace();
         }
 
@@ -231,9 +241,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
         // ==== 批量设置值
         try {
             bw.setPropertyValues(new MutablePropertyValues(deepCopy));
-        } catch (NoSuchFieldException e) {
-            e.printStackTrace();
-        } catch (IllegalAccessException e) {
+        } catch (NoSuchFieldException | IllegalAccessException e) {
             e.printStackTrace();
         }
 
@@ -256,7 +264,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
         // 依次调用所有 初始化后 处理器，生成代理对象
         wrappedBean = applyBeanPostProcessorsAfterInitialization(wrappedBean, beanName);
 
-        // 如果启用了AOP此处应该返回了代理对象，也就是说原来初始化的bean被替换了。
+        // 如果启用了AOP此处应该返回了代理对象，原来初始化的bean被替换了
         return wrappedBean;
     }
 
@@ -320,6 +328,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
         if (!Boolean.FALSE.equals(mbd.beforeInstantiationResolved)) {
             // Make sure bean class is actually resolved at this point.
             if (mbd.hasBeanClass() && hasInstantiationAwareBeanPostProcessors()) {
+
                 bean = applyBeanPostProcessorsBeforeInstantiation(mbd.getBeanClass(), beanName);
                 if (bean != null) {
                     bean = applyBeanPostProcessorsAfterInitialization(bean, beanName);
@@ -354,20 +363,6 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 //        return bean;
 //    }
 
-//    protected Class<?> determineTargetType(String beanName, RootBeanDefinition mbd, Class<?>... typesToMatch) {
-//        Class<?> targetType = mbd.getTargetType();
-//
-//        if (targetType == null) {
-//            targetType = (mbd.getFactoryMethodName() != null ?
-//                    getTypeForFactoryMethod(beanName, mbd, typesToMatch) :
-//                    resolveBeanClass(mbd, beanName, typesToMatch));
-//
-//            if (ObjectUtils.isEmpty(typesToMatch) || getTempClassLoader() == null) {
-//                mbd.targetType = targetType;
-//            }
-//        }
-//        return targetType;
-//    }
 
     public Class<?> doResolveBeanClass(RootBeanDefinition bd) {
         return doResolveBeanClass((AbstractBeanDefinition) bd);
@@ -389,10 +384,77 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
     }
 
 
-//public Object applyBeanPostProcessorsAfterInitialization(Object existingBean, String beanName)
-//public Object applyBeanPostProcessorsBeforeInitialization(Object existingBean, String beanName)
-//public void applyBeanPropertyValues(Object existingBean, String beanName) throws BeansException {
-//protected void applyPropertyValues(String beanName, BeanDefinition mbd, BeanWrapper bw, PropertyValues pvs) {
+    @Override
+    protected Class<?> predictBeanType(String beanName, RootBeanDefinition mbd, Class<?>... typesToMatch) {
+        Class<?> targetType = determineTargetType(beanName, mbd, typesToMatch);
+
+//        if (targetType != null  && hasInstantiationAwareBeanPostProcessors()) {
+//            for (BeanPostProcessor bp : getBeanPostProcessors()) {
+//                if (bp instanceof SmartInstantiationAwareBeanPostProcessor) {
+//                    SmartInstantiationAwareBeanPostProcessor ibp = (SmartInstantiationAwareBeanPostProcessor) bp;
+//                    Class<?> predicted = ibp.predictBeanType(targetType, beanName);
+//                    if (predicted != null && (typesToMatch.length != 1 || FactoryBean.class != typesToMatch[0] ||
+//                            FactoryBean.class.isAssignableFrom(predicted))) {
+//                        return predicted;
+//                    }
+//                }
+//            }
+//        }
+        return targetType;
+    }
+
+    protected Class<?> determineTargetType(String beanName, RootBeanDefinition mbd, Class<?>... typesToMatch) {
+        Class<?> targetType = mbd.getTargetType();
+
+        if (targetType == null) {
+            targetType = (mbd.getFactoryMethodName() != null ?
+                    getTypeForFactoryMethod(beanName, mbd, typesToMatch) :
+                    resolveBeanClass(mbd, beanName, typesToMatch));
+
+            if (ObjectUtils.isEmpty(typesToMatch)) {
+                mbd.setTargetType(targetType);
+            }
+        }
+        return targetType;
+    }
+
+    protected Class<?> getTypeForFactoryMethod(String beanName, RootBeanDefinition mbd, Class[] typesToMatch) {
+
+        Class<?> factoryClass;
+        boolean isStatic = true;
+
+        String factoryBeanName = mbd.getFactoryBeanName();
+        if (factoryBeanName != null) {
+            factoryClass = getType(factoryBeanName);
+            isStatic = false;
+        } else {
+            factoryClass = resolveBeanClass(mbd, beanName, typesToMatch);
+        }
+
+        if (factoryClass == null) {
+            return null;
+        }
+
+        // 存储返回值类型
+        Class<?> commonType = null;
+        if (mbd instanceof ConfigurationClassBeanDefinition) {
+            String returnTypeName = ((ConfigurationClassBeanDefinition) mbd).getFactoryMethodMetadata().getReturnTypeName();
+
+            try {
+                commonType = Class.forName(returnTypeName);
+            } catch (ClassNotFoundException e) {
+                e.printStackTrace();
+            }
+        }
+
+        if (commonType != null) {
+            return commonType;
+        }
+
+        return null;
+    }
+
+
 //public Object autowire(Class<?> beanClass, int autowireMode, boolean dependencyCheck) throws BeansException {
 //public void autowireBean(Object existingBean) {
 

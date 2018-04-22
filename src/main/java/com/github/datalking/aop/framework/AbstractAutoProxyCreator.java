@@ -83,7 +83,7 @@ public abstract class AbstractAutoProxyCreator extends ProxyConfig
                 return null;
             }
 
-            /// 先判断要不要跳过处理此beanClass
+            /// 先判断要不要跳过此beanClass，调用AnnotationAwareAspectJAutoProxyCreator的findCandidateAdvisors()扫描aspectBeanNames
             if (isInfrastructureClass(beanClass) || shouldSkip(beanClass, beanName)) {
                 this.advisedBeans.put(cacheKey, Boolean.FALSE);
                 return null;
@@ -157,7 +157,6 @@ public abstract class AbstractAutoProxyCreator extends ProxyConfig
             return bean;
         }
 
-        // Create proxy if we have advice.
         // 判断当前bean是否需要进行代理，若需要，则返回满足条件的Advice或者Advisor集合，取得Bean相关的Interceptor
         Object[] specificInterceptors = getAdvicesAndAdvisorsForBean(bean.getClass(), beanName, null);
 

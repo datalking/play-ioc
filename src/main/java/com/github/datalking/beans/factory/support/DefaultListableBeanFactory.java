@@ -131,6 +131,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 
     /**
      * 获取指定class类型的bean名称
+     * 包括扫描的bean
      */
     @Override
     public String[] getBeanNamesForType(Class<?> type) {
@@ -145,6 +146,23 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
                 if (type.isAssignableFrom(bd.getBeanClass())) {
                     result.add(beanName);
                 }
+            } else {
+
+                if (bd.getFactoryMethodName() != null) {
+                    if (bd instanceof ConfigurationClassBeanDefinition) {
+                        String returnTypeName = ((ConfigurationClassBeanDefinition) bd).getFactoryMethodMetadata().getReturnTypeName();
+                        Class c = null;
+                        try {
+                            c = Class.forName(returnTypeName);
+                        } catch (ClassNotFoundException e) {
+                            e.printStackTrace();
+                        }
+                        if (type.isAssignableFrom(c)) {
+                            result.add(beanName);
+                        }
+                    }
+                }
+
             }
 
         }
