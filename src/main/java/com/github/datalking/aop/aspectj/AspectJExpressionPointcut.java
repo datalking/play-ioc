@@ -2,13 +2,16 @@ package com.github.datalking.aop.aspectj;
 
 import com.github.datalking.aop.ClassFilter;
 import com.github.datalking.aop.MethodMatcher;
+import com.github.datalking.aop.ProxyMethodInvocation;
 import com.github.datalking.aop.framework.ProxyCreationContext;
+import com.github.datalking.aop.interceptor.ExposeInvocationInterceptor;
 import com.github.datalking.aop.support.AbstractExpressionPointcut;
 import com.github.datalking.aop.support.AopUtils;
 import com.github.datalking.beans.factory.BeanFactory;
 import com.github.datalking.beans.factory.BeanFactoryAware;
 import com.github.datalking.util.Assert;
 import com.github.datalking.util.StringUtils;
+import org.aopalliance.intercept.MethodInvocation;
 import org.aspectj.weaver.patterns.NamePattern;
 import org.aspectj.weaver.reflect.ReflectionWorld;
 import org.aspectj.weaver.reflect.ShadowMatchImpl;
@@ -24,6 +27,7 @@ import org.aspectj.weaver.tools.PointcutPrimitive;
 import org.aspectj.weaver.tools.ShadowMatch;
 
 import java.lang.reflect.Method;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -34,7 +38,8 @@ import java.util.concurrent.ConcurrentHashMap;
  *
  * @author yaoo on 4/19/18
  */
-public class AspectJExpressionPointcut extends AbstractExpressionPointcut implements ClassFilter, BeanFactoryAware {
+public class AspectJExpressionPointcut extends AbstractExpressionPointcut
+        implements ClassFilter, MethodMatcher, BeanFactoryAware {
 
     private static final Set<PointcutPrimitive> SUPPORTED_PRIMITIVES = new HashSet<>();
 
@@ -66,7 +71,7 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut implem
     private transient Map<Method, ShadowMatch> shadowMatchCache = new ConcurrentHashMap<>(32);
 
     public AspectJExpressionPointcut() {
-        buildPointcutExpression(this.getClass().getClassLoader());
+        //this.pointcutExpression = buildPointcutExpression(this.getClass().getClassLoader());
     }
 
     public AspectJExpressionPointcut(Class<?> declarationScope, String[] paramNames, Class<?>[] paramTypes) {
@@ -77,7 +82,7 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut implem
         this.pointcutParameterNames = paramNames;
         this.pointcutParameterTypes = paramTypes;
 
-        buildPointcutExpression(this.getClass().getClassLoader());
+        //this.pointcutExpression = buildPointcutExpression(this.getClass().getClassLoader());
     }
 
     /**
@@ -100,6 +105,15 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut implem
                 pointcutParameters);
     }
 
+    private void checkReadyToMatch() {
+        if (getExpression() == null) {
+            throw new IllegalStateException("Must set property 'expression' before attempting to match");
+        }
+        if (this.pointcutExpression == null) {
+            this.pointcutClassLoader = this.getClass().getClassLoader();
+            this.pointcutExpression = buildPointcutExpression(this.pointcutClassLoader);
+        }
+    }
 
     private PointcutParser initializePointcutParser(ClassLoader cl) {
         PointcutParser parser = PointcutParser.getPointcutParserSupportingSpecifiedPrimitivesAndUsingSpecifiedClassLoaderForResolution(
@@ -116,19 +130,20 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut implem
     }
 
     public PointcutExpression getPointcutExpression() {
-        //checkReadyToMatch();
+        checkReadyToMatch();
         return this.pointcutExpression;
     }
 
     @Override
     public boolean matches(Class<?> targetClass) {
         Assert.notNull(targetClass, "targetClass cannot be null!");
+        checkReadyToMatch();
         return this.pointcutExpression.couldMatchJoinPointsInType(targetClass);
     }
 
-    //@Override
+    @Override
     public boolean matches(Method method, Class<?> targetClass) {
-
+        checkReadyToMatch();
         Method targetMethod = AopUtils.getMostSpecificMethod(method, targetClass);
         ShadowMatch shadowMatch = getShadowMatch(targetMethod, method);
 
@@ -139,6 +154,43 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut implem
         } else {
             RuntimeTestWalker walker = getRuntimeTestWalker(shadowMatch);
             return (!walker.testsSubtypeSensitiveVars() || walker.testTargetInstanceOfResidue(targetClass));
+        }
+    }
+
+    @Override
+    public boolean isRuntime() {
+        checkReadyToMatch();
+        return this.pointcutExpression.mayNeedDynamicTest();
+    }
+
+    @Override
+    public boolean matches(Method method, Class<?> targetClass, Object... args) {
+        checkReadyToMatch();
+        ShadowMatch shadowMatch = getShadowMatch(AopUtils.getMostSpecificMethod(method, targetClass), method);
+        ShadowMatch originalShadowMatch = getShadowMatch(method, method);
+
+        ProxyMethodInvocation pmi = null;
+        Object targetObject = null;
+        Object thisObject = null;
+        try {
+            MethodInvocation mi = ExposeInvocationInterceptor.currentInvocation();
+            targetObject = mi.getThis();
+            if (!(mi instanceof ProxyMethodInvocation)) {
+                throw new IllegalStateException("MethodInvocation is not a Spring ProxyMethodInvocation: " + mi);
+            }
+            pmi = (ProxyMethodInvocation) mi;
+            thisObject = pmi.getProxy();
+        } catch (IllegalStateException ex) {
+            ex.printStackTrace();
+        }
+
+        try {
+            JoinPointMatch joinPointMatch = shadowMatch.matchesJoinPoint(thisObject, targetObject, args);
+
+            return joinPointMatch.matches();
+        } catch (Throwable ex) {
+            ex.printStackTrace();
+            return false;
         }
     }
 
@@ -165,19 +217,95 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut implem
 
     @Override
     public ClassFilter getClassFilter() {
-        //checkReadyToMatch();
+        checkReadyToMatch();
         return this;
     }
 
     @Override
     public MethodMatcher getMethodMatcher() {
-        //checkReadyToMatch();
-        return (MethodMatcher) this;
+        checkReadyToMatch();
+        return this;
     }
 
-
-    protected String getCurrentProxiedBeanName() {
+    private String getCurrentProxiedBeanName() {
         return ProxyCreationContext.getCurrentProxiedBeanName();
+    }
+
+    private ShadowMatch getShadowMatch(Method targetMethod, Method originalMethod) {
+        // Avoid lock contention for known Methods through concurrent access...
+        ShadowMatch shadowMatch = this.shadowMatchCache.get(targetMethod);
+        if (shadowMatch == null) {
+            synchronized (this.shadowMatchCache) {
+                // Not found - now check again with full lock...
+                PointcutExpression fallbackExpression = null;
+                Method methodToMatch = targetMethod;
+                shadowMatch = this.shadowMatchCache.get(targetMethod);
+                if (shadowMatch == null) {
+                    try {
+                        try {
+                            shadowMatch = this.pointcutExpression.matchesMethodExecution(methodToMatch);
+                        } catch (ReflectionWorld.ReflectionWorldException ex) {
+                            // Failed to introspect target method, probably because it has been loaded
+                            // in a special ClassLoader. Let's try the declaring ClassLoader instead...
+                            try {
+                                fallbackExpression = getFallbackPointcutExpression(methodToMatch.getDeclaringClass());
+                                if (fallbackExpression != null) {
+                                    shadowMatch = fallbackExpression.matchesMethodExecution(methodToMatch);
+                                }
+                            } catch (ReflectionWorld.ReflectionWorldException ex2) {
+                                fallbackExpression = null;
+                            }
+                        }
+                        if (shadowMatch == null && targetMethod != originalMethod) {
+                            methodToMatch = originalMethod;
+                            try {
+                                shadowMatch = this.pointcutExpression.matchesMethodExecution(methodToMatch);
+                            } catch (ReflectionWorld.ReflectionWorldException ex3) {
+                                // Could neither introspect the target class nor the proxy class ->
+                                // let's try the original method's declaring class before we give up...
+                                try {
+                                    fallbackExpression = getFallbackPointcutExpression(methodToMatch.getDeclaringClass());
+                                    if (fallbackExpression != null) {
+                                        shadowMatch = fallbackExpression.matchesMethodExecution(methodToMatch);
+                                    }
+                                } catch (ReflectionWorld.ReflectionWorldException ex4) {
+                                    fallbackExpression = null;
+                                }
+                            }
+                        }
+                    } catch (Throwable ex) {
+                        ex.printStackTrace();
+                        fallbackExpression = null;
+                    }
+                    if (shadowMatch == null) {
+                        shadowMatch = new ShadowMatchImpl(org.aspectj.util.FuzzyBoolean.NO, null, null, null);
+                    } else if (shadowMatch.maybeMatches() && fallbackExpression != null) {
+                        shadowMatch = new DefensiveShadowMatch(shadowMatch, fallbackExpression.matchesMethodExecution(methodToMatch));
+                    }
+                    this.shadowMatchCache.put(targetMethod, shadowMatch);
+                }
+            }
+        }
+        return shadowMatch;
+    }
+
+    private PointcutExpression getFallbackPointcutExpression(Class<?> targetClass) {
+        try {
+            ClassLoader classLoader = targetClass.getClassLoader();
+            if (classLoader != null && classLoader != this.pointcutClassLoader) {
+                return buildPointcutExpression(classLoader);
+            }
+        } catch (Throwable ex) {
+            ex.printStackTrace();
+        }
+        return null;
+    }
+
+    private RuntimeTestWalker getRuntimeTestWalker(ShadowMatch shadowMatch) {
+        if (shadowMatch instanceof DefensiveShadowMatch) {
+            return new RuntimeTestWalker(((DefensiveShadowMatch) shadowMatch).primary);
+        }
+        return new RuntimeTestWalker(shadowMatch);
     }
 
     private class BeanNamePointcutDesignatorHandler implements PointcutDesignatorHandler {
@@ -258,93 +386,8 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut implem
             if (this.expressionPattern.matches(advisedBeanName)) {
                 return true;
             }
-//            if (beanFactory != null) {
-//                String[] aliases = beanFactory.getAliases(advisedBeanName);
-//                for (String alias : aliases) {
-//                    if (this.expressionPattern.matches(alias)) {
-//                        return true;
-//                    }
-//                }
-//            }
             return false;
         }
-    }
-
-    private ShadowMatch getShadowMatch(Method targetMethod, Method originalMethod) {
-        // Avoid lock contention for known Methods through concurrent access...
-        ShadowMatch shadowMatch = this.shadowMatchCache.get(targetMethod);
-        if (shadowMatch == null) {
-            synchronized (this.shadowMatchCache) {
-                // Not found - now check again with full lock...
-                PointcutExpression fallbackExpression = null;
-                Method methodToMatch = targetMethod;
-                shadowMatch = this.shadowMatchCache.get(targetMethod);
-                if (shadowMatch == null) {
-                    try {
-                        try {
-                            shadowMatch = this.pointcutExpression.matchesMethodExecution(methodToMatch);
-                        } catch (ReflectionWorld.ReflectionWorldException ex) {
-                            // Failed to introspect target method, probably because it has been loaded
-                            // in a special ClassLoader. Let's try the declaring ClassLoader instead...
-                            try {
-                                fallbackExpression = getFallbackPointcutExpression(methodToMatch.getDeclaringClass());
-                                if (fallbackExpression != null) {
-                                    shadowMatch = fallbackExpression.matchesMethodExecution(methodToMatch);
-                                }
-                            } catch (ReflectionWorld.ReflectionWorldException ex2) {
-                                fallbackExpression = null;
-                            }
-                        }
-                        if (shadowMatch == null && targetMethod != originalMethod) {
-                            methodToMatch = originalMethod;
-                            try {
-                                shadowMatch = this.pointcutExpression.matchesMethodExecution(methodToMatch);
-                            } catch (ReflectionWorld.ReflectionWorldException ex3) {
-                                // Could neither introspect the target class nor the proxy class ->
-                                // let's try the original method's declaring class before we give up...
-                                try {
-                                    fallbackExpression = getFallbackPointcutExpression(methodToMatch.getDeclaringClass());
-                                    if (fallbackExpression != null) {
-                                        shadowMatch = fallbackExpression.matchesMethodExecution(methodToMatch);
-                                    }
-                                } catch (ReflectionWorld.ReflectionWorldException ex4) {
-                                    fallbackExpression = null;
-                                }
-                            }
-                        }
-                    } catch (Throwable ex) {
-                        ex.printStackTrace();
-                        fallbackExpression = null;
-                    }
-                    if (shadowMatch == null) {
-                        shadowMatch = new ShadowMatchImpl(org.aspectj.util.FuzzyBoolean.NO, null, null, null);
-                    } else if (shadowMatch.maybeMatches() && fallbackExpression != null) {
-                        shadowMatch = new DefensiveShadowMatch(shadowMatch, fallbackExpression.matchesMethodExecution(methodToMatch));
-                    }
-                    this.shadowMatchCache.put(targetMethod, shadowMatch);
-                }
-            }
-        }
-        return shadowMatch;
-    }
-
-    private PointcutExpression getFallbackPointcutExpression(Class<?> targetClass) {
-        try {
-            ClassLoader classLoader = targetClass.getClassLoader();
-            if (classLoader != null && classLoader != this.pointcutClassLoader) {
-                return buildPointcutExpression(classLoader);
-            }
-        } catch (Throwable ex) {
-            ex.printStackTrace();
-        }
-        return null;
-    }
-
-    private RuntimeTestWalker getRuntimeTestWalker(ShadowMatch shadowMatch) {
-        if (shadowMatch instanceof DefensiveShadowMatch) {
-            return new RuntimeTestWalker(((DefensiveShadowMatch) shadowMatch).primary);
-        }
-        return new RuntimeTestWalker(shadowMatch);
     }
 
     /**

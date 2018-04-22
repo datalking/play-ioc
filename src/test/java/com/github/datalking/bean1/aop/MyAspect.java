@@ -10,7 +10,7 @@ import org.aspectj.lang.annotation.Before;
 @Aspect
 public class MyAspect {
 
-    @Before("execution(* bean..*.*(..))")
+    @Before("execution(* com.github.datalking.bean..*.*(..))")
     public void before1() {
 
         System.out.println("====print before method called in package bean..*.*");

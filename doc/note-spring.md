@@ -3,6 +3,9 @@ Spring笔记
 
 ## summary
 
+- EventListenerMethodProcessor这个beanPostProcessor较特殊
+    - 初始化了AspectJExpressionPointcut类的shadowMatchCache
+
 - singletonObjects里面的对象可以比beanDefinitionMaps的多
 
 - 创建代理对象时，aspect切面对象可以不存在

@@ -69,6 +69,7 @@ System.out.println(beanAllStr);
 
 ## todo
 
+- [ ] jdk动态代理生成的代理对象没有interfaces 
 - [ ] 基本aop功能 
 - [ ] @Order 注解控制配置类的加载顺序
 - [ ] aop织入顺序 @Order  注解支持

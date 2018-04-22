@@ -45,10 +45,10 @@ public class ReflectiveAspectJAdvisorFactory extends AbstractAspectJAdvisorFacto
 
         // 封装MetadataAwareAspectInstanceFactory使之成为单例
         MetadataAwareAspectInstanceFactory lazySingletonAspectFactory = new LazySingletonAspectInstanceFactoryDecorator(aspectInstanceFactory);
-
         //声明为pointcut的方法不处理
         List<Advisor> advisors = new LinkedList<>();
-        for (Method method : getAdvisorMethods(aspectClass)) {
+        List<Method> ms= getAdvisorMethods(aspectClass);
+        for (Method method : ms) {
 
             //==== 普通增强器的获取
             Advisor advisor = getAdvisor(method, lazySingletonAspectFactory, advisors.size(), aspectName);
@@ -111,6 +111,26 @@ public class ReflectiveAspectJAdvisorFactory extends AbstractAspectJAdvisorFacto
                 declarationOrderInAspect,
                 aspectName);
     }
+
+    private AspectJExpressionPointcut getPointcut(Method candidateAdviceMethod, Class<?> candidateAspectClass) {
+
+        //获取方法上的注解，为了提取切入点表达式
+        AspectJAnnotation<?> aspectJAnnotation = AbstractAspectJAdvisorFactory.findAspectJAnnotationOnMethod(candidateAdviceMethod);
+        if (aspectJAnnotation == null) {
+            return null;
+        }
+
+        //使用AspectJExcepressionPointcut 实例封装获取的信息
+        AspectJExpressionPointcut ajexp = new AspectJExpressionPointcut(candidateAspectClass, new String[0], new Class<?>[0]);
+
+        //提取得到的注解中的表达式如：@Pointcut("execution(* *.*test*(..))")中的execution(* *.*test*(..))
+        String exp = aspectJAnnotation.getPointcutExpression();
+        ajexp.setExpression(exp);
+        ajexp.setBeanFactory(this.beanFactory);
+
+        return ajexp;
+    }
+
 
     /**
      * 实际创建Advice的方法
@@ -185,24 +205,6 @@ public class ReflectiveAspectJAdvisorFactory extends AbstractAspectJAdvisorFacto
         return jAdvice;
     }
 
-    private AspectJExpressionPointcut getPointcut(Method candidateAdviceMethod, Class<?> candidateAspectClass) {
-
-        //获取方法上的注解，为了提取切入点表达式
-        AspectJAnnotation<?> aspectJAnnotation = AbstractAspectJAdvisorFactory.findAspectJAnnotationOnMethod(candidateAdviceMethod);
-        if (aspectJAnnotation == null) {
-            return null;
-        }
-
-        //使用AspectJExcepressionPointcut 实例封装获取的信息
-        AspectJExpressionPointcut ajexp = new AspectJExpressionPointcut(candidateAspectClass, new String[0], new Class<?>[0]);
-
-        //提取得到的注解中的表达式如：@Pointcut("execution(* *.*test*(..))")中的execution(* *.*test*(..))
-        String exp = aspectJAnnotation.getPointcutExpression();
-        ajexp.setExpression(exp);
-        ajexp.setBeanFactory(this.beanFactory);
-
-        return ajexp;
-    }
 
 
 }

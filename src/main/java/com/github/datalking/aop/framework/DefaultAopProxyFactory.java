@@ -25,7 +25,9 @@ public class DefaultAopProxyFactory implements AopProxyFactory, Serializable {
             }
         }
 
-        if (!targetClass.isInterface()) {
+        // todo：优化自动选择创建代理的方法
+        // 目前的方法：当targetClass不是接口，且未实现任何接口时，才使用cglib创建代理
+        if (!targetClass.isInterface() && targetClass.getInterfaces().length < 1) {
             return new CglibAopProxy(config);
         }
 
