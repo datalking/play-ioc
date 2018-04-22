@@ -72,8 +72,24 @@ public abstract class AbstractAutoProxyCreator extends ProxyConfig
         this.advisorAdapterRegistry = advisorAdapterRegistry;
     }
 
+
     @Override
     public Object postProcessBeforeInstantiation(Class<?> beanClass, String beanName) {
+
+        Object cacheKey = getCacheKey(beanClass, beanName);
+
+        if (beanName == null || !this.targetSourcedBeans.contains(beanName)) {
+            if (this.advisedBeans.containsKey(cacheKey)) {
+                return null;
+            }
+
+            /// 先判断要不要跳过处理此beanClass
+            if (isInfrastructureClass(beanClass) || shouldSkip(beanClass, beanName)) {
+                this.advisedBeans.put(cacheKey, Boolean.FALSE);
+                return null;
+            }
+        }
+
         return null;
     }
 
@@ -130,11 +146,11 @@ public abstract class AbstractAutoProxyCreator extends ProxyConfig
 //        }
 
         // 无需增强
-//        if (Boolean.FALSE.equals(this.advisedBeans.get(cacheKey))) {
-//            return bean;
-//        }
+        if (Boolean.FALSE.equals(this.advisedBeans.get(cacheKey))) {
+            return bean;
+        }
 
-        // 给定的 bean 类是否代表一个基础设施类，基础设施类不应代理，或者配置了指定 bean 不需要自动代理
+        // 给定的bean类是否代表一个基础设施类，基础设施类不应代理，或者配置了指定bean不需要自动代理
         // shouldKip()默认返回false
         if (isInfrastructureClass(bean.getClass()) || shouldSkip(bean.getClass(), beanName)) {
             this.advisedBeans.put(cacheKey, Boolean.FALSE);

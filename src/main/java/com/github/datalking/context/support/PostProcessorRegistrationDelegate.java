@@ -1,5 +1,6 @@
 package com.github.datalking.context.support;
 
+import com.github.datalking.aop.aspectj.AnnotationAwareAspectJAutoProxyCreator;
 import com.github.datalking.beans.factory.config.BeanFactoryPostProcessor;
 import com.github.datalking.beans.factory.config.BeanPostProcessor;
 import com.github.datalking.beans.factory.config.ConfigurableListableBeanFactory;
@@ -103,6 +104,10 @@ public class PostProcessorRegistrationDelegate {
         for (String ppName : orderedPostProcessorNames) {
             BeanPostProcessor pp = (BeanPostProcessor) beanFactory.getBean(ppName);
             orderedPostProcessors.add(pp);
+            // 特殊初始化AnnotationAwareAspectJAutoProxyCreator的bean
+            if (pp instanceof AnnotationAwareAspectJAutoProxyCreator){
+                ((AnnotationAwareAspectJAutoProxyCreator)pp).setBeanFactory(beanFactory);
+            }
         }
 
         registerBeanPostProcessors(beanFactory, orderedPostProcessors);

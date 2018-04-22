@@ -19,7 +19,8 @@ public class AspectJAwareAdvisorAutoProxyCreator extends AbstractAdvisorAutoProx
 
     @Override
     protected boolean shouldSkip(Class<?> beanClass, String beanName) {
-        // TODO:缓存名称
+
+        // 查找所有advisor TODO:缓存名称
         List<Advisor> candidateAdvisors = findCandidateAdvisors();
 
         for (Advisor advisor : candidateAdvisors) {

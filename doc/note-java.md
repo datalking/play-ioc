@@ -8,6 +8,14 @@ java笔记
 ## summary
 
 
+
+
+- java反射创建对象
+    - Class.newInstance() 只能够调用无参的构造函数，即默认的构造函数； 
+    - Constructor.newInstance() 可以根据传入的参数，调用任意构造构造函数。 
+    - Class.newInstance() 要求被调用的构造函数是可见的，也即必须是public类型的; 
+    - Constructor.newInstance() 在特定的情况下，可以调用私有的构造函数。 
+
 - 当参数是可变长的rest参数时，取到参数变量当做数组处理
 
 - A.isAssignableFrom(B)

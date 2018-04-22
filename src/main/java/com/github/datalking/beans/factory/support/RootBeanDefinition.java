@@ -12,12 +12,13 @@ import java.lang.reflect.Method;
  */
 public class RootBeanDefinition extends AbstractBeanDefinition {
 
-    volatile Class<?> resolvedTargetType;
+    private volatile Class<?> targetType;
 
     private BeanDefinitionHolder decoratedDefinition;
 
+    // 记录是否已经执行post processor
+    volatile Boolean beforeInstantiationResolved;
 
-    // volatile ResolvableType targetType;
     // volatile ResolvableType factoryMethodReturnType;
     // Object[] resolvedConstructorArguments;
 
@@ -41,17 +42,17 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 
     public RootBeanDefinition(RootBeanDefinition original) {
         super(original);
-        this.resolvedTargetType = original.resolvedTargetType;
+        this.targetType = original.targetType;
         this.decoratedDefinition = original.decoratedDefinition;
 
     }
 
-    public Class<?> getResolvedTargetType() {
-        return resolvedTargetType;
+    public Class<?> getTargetType() {
+        return targetType;
     }
 
-    public void setResolvedTargetType(Class<?> resolvedTargetType) {
-        this.resolvedTargetType = resolvedTargetType;
+    public void setTargetType(Class<?> targetType) {
+        this.targetType = targetType;
     }
 
     public BeanDefinitionHolder getDecoratedDefinition() {

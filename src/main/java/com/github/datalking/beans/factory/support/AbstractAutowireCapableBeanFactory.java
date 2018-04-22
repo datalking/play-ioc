@@ -7,11 +7,10 @@ import com.github.datalking.beans.PropertyValue;
 import com.github.datalking.beans.factory.config.AutowireCapableBeanFactory;
 import com.github.datalking.beans.factory.config.BeanDefinition;
 import com.github.datalking.beans.factory.config.BeanPostProcessor;
+import com.github.datalking.beans.factory.config.InstantiationAwareBeanPostProcessor;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.security.AccessController;
-import java.security.PrivilegedAction;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -294,6 +293,81 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
         return result;
     }
 
+
+    protected Object applyBeanPostProcessorsBeforeInstantiation(Class<?> beanClass, String beanName) {
+
+        List<BeanPostProcessor> beanPostProcessors = getBeanPostProcessors();
+
+        for (BeanPostProcessor bp : beanPostProcessors) {
+
+            if (bp instanceof InstantiationAwareBeanPostProcessor) {
+
+                InstantiationAwareBeanPostProcessor ibp = (InstantiationAwareBeanPostProcessor) bp;
+
+                // 生成代理对象
+                Object result = ibp.postProcessBeforeInstantiation(beanClass, beanName);
+                if (result != null) {
+                    return result;
+                }
+            }
+        }
+        return null;
+    }
+
+
+    protected Object resolveBeforeInstantiation(String beanName, RootBeanDefinition mbd) {
+        Object bean = null;
+        if (!Boolean.FALSE.equals(mbd.beforeInstantiationResolved)) {
+            // Make sure bean class is actually resolved at this point.
+            if (mbd.hasBeanClass() && hasInstantiationAwareBeanPostProcessors()) {
+                bean = applyBeanPostProcessorsBeforeInstantiation(mbd.getBeanClass(), beanName);
+                if (bean != null) {
+                    bean = applyBeanPostProcessorsAfterInitialization(bean, beanName);
+                }
+            }
+            mbd.beforeInstantiationResolved = (bean != null);
+        }
+        return bean;
+    }
+
+//    protected Object resolveBeforeInstantiation(String beanName, RootBeanDefinition mbd) {
+//        Object bean = null;
+//        if (!Boolean.FALSE.equals(mbd.beforeInstantiationResolved)) {
+//
+//            // Make sure bean class is actually resolved at this point.
+//            if (hasInstantiationAwareBeanPostProcessors()) {
+//
+//                Class<?> targetType = determineTargetType(beanName, mbd);
+//
+//                if (targetType != null) {
+//                    // 执行 实例化前 方法
+//                    bean = applyBeanPostProcessorsBeforeInstantiation(targetType, beanName);
+//
+//                    if (bean != null) {
+//                        // 执行
+//                        bean = applyBeanPostProcessorsAfterInitialization(bean, beanName);
+//                    }
+//                }
+//            }
+//            mbd.beforeInstantiationResolved = (bean != null);
+//        }
+//        return bean;
+//    }
+
+//    protected Class<?> determineTargetType(String beanName, RootBeanDefinition mbd, Class<?>... typesToMatch) {
+//        Class<?> targetType = mbd.getTargetType();
+//
+//        if (targetType == null) {
+//            targetType = (mbd.getFactoryMethodName() != null ?
+//                    getTypeForFactoryMethod(beanName, mbd, typesToMatch) :
+//                    resolveBeanClass(mbd, beanName, typesToMatch));
+//
+//            if (ObjectUtils.isEmpty(typesToMatch) || getTempClassLoader() == null) {
+//                mbd.targetType = targetType;
+//            }
+//        }
+//        return targetType;
+//    }
 
     public Class<?> doResolveBeanClass(RootBeanDefinition bd) {
         return doResolveBeanClass((AbstractBeanDefinition) bd);
