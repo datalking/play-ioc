@@ -11,6 +11,9 @@ import com.github.datalking.context.annotation.AnnotationConfigApplicationContex
 import com.github.datalking.util.StringUtils;
 import org.junit.Test;
 
+import java.io.ByteArrayOutputStream;
+import java.io.PrintStream;
+
 import static org.junit.Assert.assertEquals;
 
 @Configuration
@@ -32,11 +35,19 @@ public class PureAnnoAOPTest {
 
     @Test
     public void testJDKProxyBefore() throws Exception {
+
+        PrintStream newConsole = System.out;
+
+        ByteArrayOutputStream consoleStorage = new ByteArrayOutputStream();
+        System.setOut(new PrintStream(consoleStorage));
+
         ApplicationContext ctx = new AnnotationConfigApplicationContext(PureAnnoAOPTest.class);
         FooInterface bean = (FooInterface) ctx.getBean("fooService");
-        String s=bean.printInnerText();
-        //System.out.println(s);
-        assertEquals(2, StringUtils.countWordFromStr(s,"print"));
+        String s = bean.printInnerText();
+//        System.out.println(s);
+//        System.setOut(newConsole);
+//        System.out.println("= " + consoleStorage.toString());
+        assertEquals(2, StringUtils.countWordFromStr(consoleStorage.toString(), "print"));
 
     }
 

@@ -7,7 +7,6 @@ import java.lang.reflect.WildcardType;
 
 /**
  * 类型操作工具类
- * copied from spring
  */
 public abstract class TypeUtils {
 

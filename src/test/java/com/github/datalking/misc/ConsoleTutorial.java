@@ -3,28 +3,31 @@ package com.github.datalking.misc;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 
+/**
+ * 获取控制台输出的示例
+ */
 public class ConsoleTutorial {
 
     public static void main(String[] args) {
 
         System.out.println("One");
 
-        // Storing console output to consoleStorage.
-        ByteArrayOutputStream consoleStorage = new ByteArrayOutputStream();
+        // 保存原来的out
         PrintStream newConsole = System.out;
+
+        ByteArrayOutputStream consoleStorage = new ByteArrayOutputStream();
         System.setOut(new PrintStream(consoleStorage));
 
-        // Here all System.out.println() calls will be stored in consoleStorage.
-        System.out.println("two");     // Note: The output "two" you see from the console
-        //        doesn't come from this line but from the lines below(newConsole.println());
+        // 这里不打印，只存储到 consoleStorage
+        System.out.println("two");
 
+        // 这里打印
         newConsole.println(consoleStorage.toString());
         newConsole.println(consoleStorage.toString());
 
-        // Restore back the standard console output.
+        // 还原out
         System.setOut(newConsole);
 
-        // Print to console.
         System.out.println("three");
         System.out.println(consoleStorage.toString());
     }

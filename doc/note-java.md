@@ -8,7 +8,7 @@ java笔记
 ## summary
 
 
-
+- jdk动态代理生成执行before、after的打印结果可以通过System.setOut重定向来获取
 
 - java反射创建对象
     - Class.newInstance() 只能够调用无参的构造函数，即默认的构造函数； 
