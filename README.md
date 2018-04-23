@@ -64,16 +64,14 @@ xmlBeanDefinitionReader.loadBeanDefinitions("beans-primitive.xml");
 BeanAllStr beanAllStr = (BeanAllStr) beanFactory.getBean("beanAllStr");
 System.out.println(beanAllStr);
 ```
-## bug
-- AbstractBeanFactory.isTypeMatch()空指针异常
 
 ## todo
 
+- [ ] 基本mvc 
 - [ ] cglib实现aop 
 - [ ] @Order 注解控制配置类的加载顺序
 - [ ] aop织入顺序 @Order  注解支持
 - [ ] getBean By class   
-- [ ] 支持BeanPostProcessor   
 - [ ] 支持别名   
 - [ ] xml新增支持constructor-args元素   
 - [ ] 处理嵌套bean的问题   
@@ -81,12 +79,14 @@ System.out.println(beanAllStr);
 - [ ] 处理AOP中的循环依赖   
 
 - [x] jdk动态代理实现aop 
+- [x] 支持BeanPostProcessor   
 - [x] 支持@ComponentScan配置basePackages
 - [x] 手动通过注解注册bean生成BeanDefinition: @Configuration  @Bean   
 - [x] 各种BeanDefinition转换成RootBeanDefinition   
 - [x] ApplicationContext支持开启与关闭懒加载   
 
 ## later
+- [ ] 通过@EnableAspectJAutoProxy的 proxyTargetClass 强制使用cglib生成代理对象  
 - [ ] 同一个类同时被@Component标记和@Bean工厂方法标记时，要抛出异常   
 - [ ] 支持@ComponentScan配置basePackageClasses   
 - [ ] 支持@ComponentScans   
@@ -112,7 +112,8 @@ System.out.println(beanAllStr);
 - AbstractAutowireCapableBeanFactory的doCreateBean()方法会创建bean实例
     - bean实例最终保存到DefaultSingletonBeanRegistry的 `singletonObjects` 
 - 注解相关
-    - 使用注解时，要用 `@Configuration`，表示一个配置类，相当于配置文件的 `<beans>`，同一个类上还可以配置 `@ComponentScan` 
+    - 使用注解时，要用 `@Configuration`，表示一个配置类，相当于配置文件的 `<beans>`，
+      同一个类上还可以配置 `@ComponentScan`、`@EnableAspectJAutoProxy`     
     - @ComponentScan不设置值时，默认扫描该类所在的包及所有子包
 
 ## License
