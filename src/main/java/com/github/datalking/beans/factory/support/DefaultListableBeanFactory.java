@@ -97,9 +97,9 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 
         for (String beanName : beanNames) {
 
-            if (beanName.equals("fooService")) {
-                System.out.println("====preInstantiateSingletons: " + beanName);
-            }
+//            if (beanName.equals("fooService")) {
+//                System.out.println("====preInstantiateSingletons: " + beanName);
+//            }
 
             getBean(beanName);
         }

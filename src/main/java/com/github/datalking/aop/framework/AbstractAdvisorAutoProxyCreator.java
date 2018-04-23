@@ -15,6 +15,8 @@ public abstract class AbstractAdvisorAutoProxyCreator extends AbstractAutoProxyC
 
     private BeanFactoryAdvisorRetrievalHelper advisorRetrievalHelper;
 
+    protected abstract void extendAdvisors(List<Advisor> candidateAdvisors);
+
     @Override
     public void setBeanFactory(BeanFactory beanFactory) {
         super.setBeanFactory(beanFactory);
@@ -50,7 +52,9 @@ public abstract class AbstractAdvisorAutoProxyCreator extends AbstractAutoProxyC
         // 寻找所有增强中 适用于bean的增强
         List<Advisor> eligibleAdvisors = findAdvisorsThatCanApply(candidateAdvisors, beanClass, beanName);
 
-//        extendAdvisors(eligibleAdvisors);
+        // 添加额外advisor
+        extendAdvisors(eligibleAdvisors);
+
 //        if (!eligibleAdvisors.isEmpty()) {
 //            eligibleAdvisors = sortAdvisors(eligibleAdvisors);
 //        }

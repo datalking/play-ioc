@@ -23,7 +23,7 @@ public class DefaultAdvisorChainFactory implements AdvisorChainFactory, Serializ
     @Override
     public List<Object> getInterceptorsAndDynamicInterceptionAdvice(Advised config, Method method, Class<?> targetClass) {
 
-        List<Object> interceptorList = new ArrayList<Object>(config.getAdvisors().length);
+        List<Object> interceptorList = new ArrayList<>(config.getAdvisors().length);
 
         Class<?> actualClass = (targetClass != null ? targetClass : method.getDeclaringClass());
 

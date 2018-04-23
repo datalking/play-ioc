@@ -20,16 +20,23 @@ public abstract class ClassUtils {
     private static final Map<Class<?>, Class<?>> primitiveTypeToWrapperMap = new IdentityHashMap<>(8);
 
 
+    public static Class<?>[] getAllInterfacesForClass(Class<?> clazz, ClassLoader classLoader) {
+        Set<Class<?>> ifcs = getAllInterfacesForClassAsSet(clazz, classLoader);
+        return ifcs.toArray(new Class<?>[ifcs.size()]);
+    }
+
     public static Set<Class<?>> getAllInterfacesForClassAsSet(Class<?> clazz) {
         return getAllInterfacesForClassAsSet(clazz, null);
     }
 
+    // 返回clazz类及其超类实现的所有接口
     public static Set<Class<?>> getAllInterfacesForClassAsSet(Class<?> clazz, ClassLoader classLoader) {
         Assert.notNull(clazz, "Class must not be null");
 
         if (clazz.isInterface() && isVisible(clazz, classLoader)) {
             return Collections.singleton(clazz);
         }
+
         Set<Class<?>> interfaces = new LinkedHashSet<>();
         while (clazz != null) {
             Class<?>[] ifcs = clazz.getInterfaces();
@@ -40,6 +47,7 @@ public abstract class ClassUtils {
             }
             clazz = clazz.getSuperclass();
         }
+
         return interfaces;
     }
 

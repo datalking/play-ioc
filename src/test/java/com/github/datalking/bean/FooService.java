@@ -16,8 +16,9 @@ public class FooService implements FooInterface {
     }
 
     @Override
-    public void printInnerText() {
-        System.out.println(text);
+    public String printInnerText() {
+        //System.out.println(text);
+        return text;
     }
 
 }

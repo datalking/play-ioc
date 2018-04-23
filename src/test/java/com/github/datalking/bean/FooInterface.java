@@ -5,7 +5,7 @@ package com.github.datalking.bean;
  */
 public interface FooInterface {
 
-    void printInnerText();
+    String printInnerText();
 
 }
 

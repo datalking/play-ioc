@@ -3,31 +3,33 @@ package com.github.datalking.util;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.StringTokenizer;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * 字符串工具类
  *
  * @author yaoo on 4/3/18
  */
-public interface StringUtils {
+public abstract class StringUtils {
 
-    static boolean isEmpty(String str) {
+    public static boolean isEmpty(String str) {
         return (str == null || "".equals(str));
     }
 
-    static boolean isNotEmpty(String str) {
+    public static boolean isNotEmpty(String str) {
         return (str != null && str.length() > 0);
     }
 
 
-    static String firstLetterUpperCase(String original) {
+    public static String firstLetterUpperCase(String original) {
         String result = "";
         result = Character.toUpperCase(original.charAt(0)) + original.substring(1);
         return result;
     }
 
 
-    static String replace(String inString, String oldPattern, String newPattern) {
+    public static String replace(String inString, String oldPattern, String newPattern) {
 
         if (!hasLength(inString) || !hasLength(oldPattern) || newPattern == null) {
             return inString;
@@ -58,20 +60,20 @@ public interface StringUtils {
         return sb.toString();
     }
 
-    static boolean hasLength(String str) {
+    public static boolean hasLength(String str) {
         return hasLength((CharSequence) str);
     }
 
-    static boolean hasLength(CharSequence str) {
+    public static boolean hasLength(CharSequence str) {
         return (str != null && str.length() > 0);
     }
 
-    static boolean hasText(String input) {
+    public static boolean hasText(String input) {
 
         return input != null && input.trim().length() > 0;
     }
 
-    static String[] tokenizeToStringArray(String str, String delimiters, boolean trimTokens, boolean ignoreEmptyTokens) {
+    public static String[] tokenizeToStringArray(String str, String delimiters, boolean trimTokens, boolean ignoreEmptyTokens) {
 
         if (str == null) {
             return null;
@@ -91,11 +93,11 @@ public interface StringUtils {
         return tokens.toArray(new String[tokens.size()]);
     }
 
-    static String[] tokenizeToStringArray(String str, String delimiters) {
+    public static String[] tokenizeToStringArray(String str, String delimiters) {
         return tokenizeToStringArray(str, delimiters, true, true);
     }
 
-    static String trimWhitespace(String str) {
+    public static String trimWhitespace(String str) {
         if (!hasLength(str)) {
             return str;
         }
@@ -110,15 +112,15 @@ public interface StringUtils {
         return sb.toString();
     }
 
-    static String[] commaDelimitedListToStringArray(String str) {
+    public static String[] commaDelimitedListToStringArray(String str) {
         return delimitedListToStringArray(str, ",");
     }
 
-    static String[] delimitedListToStringArray(String str, String delimiter) {
+    public static String[] delimitedListToStringArray(String str, String delimiter) {
         return delimitedListToStringArray(str, delimiter, null);
     }
 
-    static String[] delimitedListToStringArray(String str, String delimiter, String charsToDelete) {
+    public static String[] delimitedListToStringArray(String str, String delimiter, String charsToDelete) {
         if (str == null) {
             return new String[0];
         }
@@ -146,7 +148,7 @@ public interface StringUtils {
         return result.toArray(new String[result.size()]);
     }
 
-    static String deleteAny(String inString, String charsToDelete) {
+    public static String deleteAny(String inString, String charsToDelete) {
         if (!hasLength(inString) || !hasLength(charsToDelete)) {
             return inString;
         }
@@ -159,6 +161,36 @@ public interface StringUtils {
             }
         }
         return sb.toString();
+    }
+
+    public static int countWordFromStr1(String srcText, String keyword) {
+        int count = 0;
+        Pattern p = Pattern.compile(keyword);
+        Matcher m = p.matcher(srcText);
+        while (m.find()) {
+            count++;
+        }
+        return count;
+    }
+
+    public static int countWordFromStr(String srcText, String keyword) {
+        int count = 0;
+        int len = srcText.length();
+        int j = 0;
+        for (int i = 0; i < len; i++) {
+            if (srcText.charAt(i) == keyword.charAt(j)) {
+                j++;
+                if (j == keyword.length()) {
+                    count++;
+                    j = 0;
+                }
+            } else {
+                i = i - j;
+                j = 0;
+            }
+        }
+
+        return count;
     }
 
 }

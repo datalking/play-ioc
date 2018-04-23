@@ -13,6 +13,7 @@ import com.github.datalking.beans.factory.FactoryBean;
 import com.github.datalking.beans.factory.config.ConfigurableBeanFactory;
 import com.github.datalking.beans.factory.config.SmartInstantiationAwareBeanPostProcessor;
 import com.github.datalking.common.Ordered;
+import com.github.datalking.util.ClassUtils;
 import com.github.datalking.util.StringUtils;
 import org.aopalliance.aop.Advice;
 
@@ -186,14 +187,15 @@ public abstract class AbstractAutoProxyCreator extends ProxyConfig
         //拷贝当前类中的相关属性
         //proxyFactory.copyFrom(this);
 
-        //判定给定的bean是否代理Class
-//        if (!proxyFactory.isProxyTargetClass()) {
-//            if (shouldProxyTargetClass(beanClass, beanName)) {
-//                proxyFactory.setProxyTargetClass(true);
-//            } else {
-//                evaluateProxyInterfaces(beanClass, proxyFactory);
-//            }
-//        }
+        //判定是否代理beanClass
+        if (!proxyFactory.isProxyTargetClass()) {
+            if (shouldProxyTargetClass(beanClass, beanName)) {
+                proxyFactory.setProxyTargetClass(true);
+            } else {
+                // 获取beanClass实现的接口
+                evaluateProxyInterfaces(beanClass, proxyFactory);
+            }
+        }
 
         // 添加Advisors
         Advisor[] advisors = buildAdvisors(beanName, specificInterceptors);
@@ -212,6 +214,33 @@ public abstract class AbstractAutoProxyCreator extends ProxyConfig
 //        }
 
         return proxyFactory.getProxy();
+    }
+
+    protected boolean shouldProxyTargetClass(Class<?> beanClass, String beanName) {
+        return false;
+    }
+
+    /**
+     * 检查beanClass的接口，并存储到proxyFactory
+     */
+    protected void evaluateProxyInterfaces(Class<?> beanClass, ProxyFactory proxyFactory) {
+        Class<?>[] targetInterfaces = ClassUtils.getAllInterfacesForClass(beanClass, this.getClass().getClassLoader());
+
+//        boolean hasReasonableProxyInterface = false;
+//        for (Class<?> ifc : targetInterfaces) {
+//            if (!isConfigurationCallbackInterface(ifc) && !isInternalLanguageInterface(ifc) &&
+//                    ifc.getMethods().length > 0) {
+//                hasReasonableProxyInterface = true;
+//                break;
+//            }
+//        }
+//        if (hasReasonableProxyInterface) {
+        for (Class<?> ifc : targetInterfaces) {
+            proxyFactory.addInterface(ifc);
+        }
+//        } else {
+//            proxyFactory.setProxyTargetClass(true);
+//        }
     }
 
     /**

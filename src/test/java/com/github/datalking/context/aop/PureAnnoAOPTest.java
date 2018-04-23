@@ -8,7 +8,10 @@ import com.github.datalking.bean.FooService;
 import com.github.datalking.bean1.aop.MyAspect;
 import com.github.datalking.context.ApplicationContext;
 import com.github.datalking.context.annotation.AnnotationConfigApplicationContext;
+import com.github.datalking.util.StringUtils;
 import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
 
 @Configuration
 @EnableAspectJAutoProxy
@@ -28,10 +31,13 @@ public class PureAnnoAOPTest {
 
 
     @Test
-    public void testAnnoScanBeans() throws Exception {
+    public void testJDKProxyBefore() throws Exception {
         ApplicationContext ctx = new AnnotationConfigApplicationContext(PureAnnoAOPTest.class);
         FooInterface bean = (FooInterface) ctx.getBean("fooService");
-        bean.printInnerText();
+        String s=bean.printInnerText();
+        //System.out.println(s);
+        assertEquals(2, StringUtils.countWordFromStr(s,"print"));
+
     }
 
 

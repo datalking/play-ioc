@@ -12,6 +12,9 @@ public class ProxyCreatorSupport extends AdvisedSupport {
 
     private AopProxyFactory aopProxyFactory;
 
+    // 创建一个代理后就会设为true
+    private boolean active = false;
+
     public ProxyCreatorSupport() {
         this.aopProxyFactory = new DefaultAopProxyFactory();
     }
@@ -31,8 +34,22 @@ public class ProxyCreatorSupport extends AdvisedSupport {
 
 
     protected final synchronized AopProxy createAopProxy() {
+        if (!this.active) {
+            activate();
+        }
 
         return getAopProxyFactory().createAopProxy(this);
+    }
+
+    private void activate() {
+        this.active = true;
+//        for (AdvisedSupportListener listener : this.listeners) {
+//            listener.activated(this);
+//        }
+    }
+
+    protected final synchronized boolean isActive() {
+        return this.active;
     }
 
 }

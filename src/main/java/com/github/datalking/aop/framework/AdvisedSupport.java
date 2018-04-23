@@ -29,7 +29,7 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
     TargetSource targetSource = EMPTY_TARGET_SOURCE;
 
     // 代理要实现的接口
-    private List<Class<?>> interfaces = new ArrayList<Class<?>>();
+    private List<Class<?>> interfaces = new ArrayList<>();
 
     // 添加的advice会包装成advisor，保存在这里
     private List<Advisor> advisors = new LinkedList<>();
@@ -53,9 +53,9 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
         setInterfaces(interfaces);
     }
 
-    private void initMethodCache() {
-        this.methodCache = new ConcurrentHashMap<>(32);
-    }
+//    private void initMethodCache() {
+//        this.methodCache = new ConcurrentHashMap<>(32);
+//    }
 
     public void setInterfaces(Class<?>... interfaces) {
         Assert.notNull(interfaces, "Interfaces must not be null");
@@ -101,6 +101,7 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
         this.targetSource = new EmptyTargetSource(targetClass);
     }
 
+    // 为target对象创建SingletonTargetSource
     public void setTarget(Object target) {
         setTargetSource(new SingletonTargetSource(target));
     }
@@ -128,18 +129,17 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
         return false;
     }
 
-
-    @Override
-    public final Advisor[] getAdvisors() {
-        return this.advisorArray;
-    }
-
     protected final void updateAdvisorArray() {
         this.advisorArray = this.advisors.toArray(new Advisor[this.advisors.size()]);
     }
 
     protected final List<Advisor> getAdvisorsInternal() {
         return this.advisors;
+    }
+
+    @Override
+    public final Advisor[] getAdvisors() {
+        return this.advisorArray;
     }
 
     @Override
@@ -187,7 +187,7 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
             }
         }
 
-        Advisor advisor = this.advisors.get(index);
+        //Advisor advisor = this.advisors.get(index);
 
         this.advisors.remove(index);
         updateAdvisorArray();
@@ -293,5 +293,15 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
         return count;
     }
 
+    public List<Object> getInterceptorsAndDynamicInterceptionAdvice(Method method, Class<?> targetClass) {
+        MethodCacheKey cacheKey = new MethodCacheKey(method);
+        List<Object> cached = this.methodCache.get(cacheKey);
+        if (cached == null) {
+            cached = this.advisorChainFactory.getInterceptorsAndDynamicInterceptionAdvice(
+                    this, method, targetClass);
+            this.methodCache.put(cacheKey, cached);
+        }
+        return cached;
+    }
 
 }

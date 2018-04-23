@@ -69,8 +69,7 @@ System.out.println(beanAllStr);
 
 ## todo
 
-- [ ] jdk动态代理生成的代理对象没有interfaces 
-- [ ] 基本aop功能 
+- [ ] cglib实现aop 
 - [ ] @Order 注解控制配置类的加载顺序
 - [ ] aop织入顺序 @Order  注解支持
 - [ ] getBean By class   
@@ -81,6 +80,7 @@ System.out.println(beanAllStr);
 - [ ] xml中同名bean抛出异常   
 - [ ] 处理AOP中的循环依赖   
 
+- [x] jdk动态代理实现aop 
 - [x] 支持@ComponentScan配置basePackages
 - [x] 手动通过注解注册bean生成BeanDefinition: @Configuration  @Bean   
 - [x] 各种BeanDefinition转换成RootBeanDefinition   

@@ -119,11 +119,15 @@ public interface AopUtils {
             Class<?> targetClass = advised.getTargetClass();
 
             if (targetClass != null) {
+                /// 如果是接口
                 if (targetClass.isInterface()) {
                     advised.setInterfaces(targetClass);
-                } else if (Proxy.isProxyClass(targetClass)) {
+                }
+                /// 如果本身是代理类
+                else if (Proxy.isProxyClass(targetClass)) {
                     advised.setInterfaces(targetClass.getInterfaces());
                 }
+
                 specifiedInterfaces = advised.getProxiedInterfaces();
             }
         }

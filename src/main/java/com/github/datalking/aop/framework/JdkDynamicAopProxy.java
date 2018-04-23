@@ -18,10 +18,10 @@ import java.util.List;
 public class JdkDynamicAopProxy implements AopProxy, InvocationHandler, Serializable {
 
     // 代理配置信息
-    private final AdvisedSupport advisedSupport;
+    private final AdvisedSupport advised;
 
     public JdkDynamicAopProxy(AdvisedSupport advisedSupport) {
-        this.advisedSupport = advisedSupport;
+        this.advised = advisedSupport;
     }
 
 
@@ -31,7 +31,7 @@ public class JdkDynamicAopProxy implements AopProxy, InvocationHandler, Serializ
         ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
 
         // 获取接口
-        Class<?>[] proxiedInterfaces = AopUtils.completeProxiedInterfaces(this.advisedSupport);
+        Class<?>[] proxiedInterfaces = AopUtils.completeProxiedInterfaces(this.advised);
 
         Object newObj = Proxy.newProxyInstance(classLoader, proxiedInterfaces, this);
 
@@ -45,7 +45,7 @@ public class JdkDynamicAopProxy implements AopProxy, InvocationHandler, Serializ
         MethodInvocation invocation;
 
         //代理的目标对象封装
-        TargetSource targetSource = advisedSupport.targetSource;
+        TargetSource targetSource = advised.targetSource;
         // 目标对象的class
         Class targetClass = null;
         // 目标对象本身
@@ -59,18 +59,18 @@ public class JdkDynamicAopProxy implements AopProxy, InvocationHandler, Serializ
         }
 
         //获取配置的通知Advice
-        List chain = this.advisedSupport.advisorChainFactory
-                .getInterceptorsAndDynamicInterceptionAdvice(advisedSupport, method, targetClass);
+        List chain = this.advised.advisorChainFactory
+                .getInterceptorsAndDynamicInterceptionAdvice(advised, method, targetClass);
 
         Object retVal;
 
-        //没有配置通知
+        //没有配置增强处理advice
         if (chain.isEmpty()) {
             //直接调用目标对象的方法
             retVal = AopUtils.invokeJoinpointUsingReflection(target, method, args);
 
         } else {
-            //配置了通知，创建一个MethodInvocation
+            //配置了advice，创建一个MethodInvocation
             invocation = new ReflectiveMethodInvocation(proxy, target, method, args, targetClass, chain);
 
             //执行通知链，沿着通知器链调用所有的通知
