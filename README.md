@@ -67,7 +67,6 @@ System.out.println(beanAllStr);
 
 ## todo
 
-- [ ] 基本mvc 
 - [ ] cglib实现aop 
 - [ ] @Order 注解控制配置类的加载顺序
 - [ ] aop织入顺序 @Order  注解支持

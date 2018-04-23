@@ -4,7 +4,7 @@
 
     <artifactId>play-ioc</artifactId>
     <groupId>com.github.datalking</groupId>
-    <version>0.0.2</version>
+    <version>0.0.3</version>
     <packaging>jar</packaging>
     <name>play-ioc</name>
     <description>simple ioc container with aop support.</description>
@@ -109,6 +109,9 @@
                                 <goals>
                                     <goal>jar</goal>
                                 </goals>
+                                <configuration>
+                                    <additionalparam>-Xdoclint:none</additionalparam>
+                                </configuration>
                             </execution>
                         </executions>
                     </plugin>

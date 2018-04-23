@@ -9,14 +9,10 @@ package com.github.datalking.beans.factory.config;
  */
 public interface BeanPostProcessor {
 
-    /**
-     * 初始化前执行
-     */
+    // 初始化前执行
     Object postProcessBeforeInitialization(Object bean, String beanName);
 
-    /**
-     * 初始化后执行
-     */
+    // 初始化后执行
     Object postProcessAfterInitialization(Object bean, String beanName);
 
 }
