@@ -5,6 +5,7 @@
 - 稳定健壮(ing)的IoC和AOP功能
 - 与Spring相同的使用方式
 - lite版仅支持IoC，不支持AOP，不推荐使用[play-ioc-lite](https://github.com/datalking/play-ioc-lite)
+- 推荐使用开箱即用的[play-mvc](https://github.com/datalking/play-mvc)
 
 ## overview
 - 支持从xml中读取bean配置
@@ -18,8 +19,8 @@
     - 不支持动态代理指定构造函数参数
     - 不支持将bean的value类型配置为set,list,map，仅支持字符串和ref  
     - 不支持为bean指定别名
-    - 不支持xml中指定扫描指定包，仅支持注解扫描指定包
     - 不支持构造注入与方法注入，仅支持属性注入
+    - 不支持xml中指定扫描指定包，仅支持注解扫描指定包
     - 不支持创建和使用除 `play-ioc支持的xml配置说明` 外的自定义xml标签
     - 不支持将嵌套子元素作为属性，仅支持统一使用扁平方式指定属性  
         - 不支持innerBean的写法，建议扁平化定义bean，使用ref属性引用其他bean
